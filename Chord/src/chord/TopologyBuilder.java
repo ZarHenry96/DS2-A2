@@ -1,7 +1,10 @@
 package chord;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
+
+import org.apache.commons.lang3.RandomStringUtils;
 
 import net.sf.jasperreports.engine.util.DigestUtils;
 import repast.simphony.context.Context;
@@ -20,7 +23,8 @@ import repast.simphony.engine.schedule.ScheduleParameters;
 public class TopologyBuilder implements ContextBuilder<Object> {
 
 	private Random rnd;
-	private ArrayList<Node> nodes;
+	private ArrayList<Node> all_nodes;
+	private HashSet<Node> active_nodes;
 
 	@Override
 	public Context<Object> build(Context<Object> context) {
@@ -28,7 +32,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		
 		int seed = params.getInteger("randomSeed");
 		double crash_pr = params.getDouble("crash_pr");
-		double recoveryInterval = params.getDouble("recovery_interval");
+		double recovery_interval = params.getDouble("recovery_interval");
 		double message_loss = params.getDouble("message_loss");
 		
 		int hash_size = params.getInteger("m");
@@ -37,26 +41,48 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		int center = space_size/2;
 		int radius = (center*3)/4;
 		
+		int init_num_nodes = params.getInteger("init_num_nodes");
+		
+		Utils.setMaxId(hash_size);
+		
 		context.setId("Chord");
 		
 		ContinuousSpaceFactory spaceFactory = ContinuousSpaceFactoryFinder.createContinuousSpaceFactory(null);
 		ContinuousSpace<Object> space = spaceFactory.createContinuousSpace("space", context, new RandomCartesianAdder<Object>(),
 				new repast.simphony.space.continuous.WrapAroundBorders(), space_size, space_size);
-
+		
 		NetworkBuilder<Object> netBuilder = new NetworkBuilder<Object>("chord_network", context, true);
 		Network<Object> network = netBuilder.buildNetwork();
 
+		Ring ring = new Ring(Float.valueOf(String.valueOf(radius)));
+		context.add(ring);
+		space.moveTo(ring, center, center);
+		
 		this.rnd = new Random(seed);
-		this.nodes = new ArrayList<>();
+		this.all_nodes = new ArrayList<>();
 		for (int i = 0; i < num_nodes; i++) {
-			Node node = new Node(network, this.rnd, hash_size, i, crash_pr, recoveryInterval, message_loss);
-			this.nodes.add(node);
-			context.add(node);
-			space.moveTo(node, center+radius*Math.sin(Math.toRadians((360.0/num_nodes)*i)), center+radius*Math.cos(Math.toRadians((360.0/num_nodes)*i)));
+			Node node = new Node(
+					network, 
+					this.rnd, 
+					hash_size, 
+					i,
+					center+radius*Math.sin(Math.toRadians((360.0/num_nodes)*i)), 
+					center+radius*Math.cos(Math.toRadians((360.0/num_nodes)*i)),
+					crash_pr, 
+					recovery_interval, 
+					message_loss
+			);
+			this.all_nodes.add(node);
 		}
 		
-		for (int i = 0; i < num_nodes; i++) {
-					
+		active_nodes = new HashSet<>();
+		while(active_nodes.size() < init_num_nodes) {
+			Node node = this.all_nodes.get(this.rnd.nextInt(this.all_nodes.size()));
+			if(!this.active_nodes.contains(node)) {
+				active_nodes.add(node);
+				context.add(node);
+				space.moveTo(node, node.getX(), node.getY());
+			}
 		}
 
 		/*

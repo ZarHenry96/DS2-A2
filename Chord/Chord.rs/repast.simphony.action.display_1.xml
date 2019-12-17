@@ -3,11 +3,19 @@
   <type>2D</type>
   <styles>
     <entry>
+      <string>chord.Ring</string>
+      <string>chord.RingStyle</string>
+    </entry>
+    <entry>
       <string>chord.Node</string>
       <string>chord.NodeStyle</string>
     </entry>
   </styles>
   <editedStyles>
+    <entry>
+      <string>chord.Ring</string>
+      <null/>
+    </entry>
     <entry>
       <string>chord.Node</string>
       <null/>
@@ -33,15 +41,19 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>996998581</hashCode>
+    <hashCode>1628067020</hashCode>
   </schedParams>
   <layoutClassName>foo.bar.baz</layoutClassName>
   <layoutProjection>space</layoutProjection>
   <layoutInterval>0</layoutInterval>
   <layerOrder>
     <entry>
-      <string>chord.Node</string>
+      <string>chord.Ring</string>
       <int>0</int>
+    </entry>
+    <entry>
+      <string>chord.Node</string>
+      <int>1</int>
     </entry>
   </layerOrder>
   <projections>

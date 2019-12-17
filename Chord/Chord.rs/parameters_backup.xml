@@ -6,6 +6,12 @@
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
+				<parameter name="init_num_nodes" displayName="Initial number of nodes" type="int" 
+						defaultValue="4" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+									
+		/>
 				<parameter name="recovery_interval" displayName="Number of ticks needed for recovery" type="double" 
 						defaultValue="4.0" 
 						isReadOnly="false" 
@@ -19,7 +25,7 @@
 									
 		/>
 				<parameter name="m" displayName="Hash size" type="int" 
-						defaultValue="6" 
+						defaultValue="4" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
