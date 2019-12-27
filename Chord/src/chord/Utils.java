@@ -14,7 +14,7 @@ public class Utils {
 		}
 	}
 	
-	public static Integer getHashKey(String key)
+	public static Integer getHash(String key)
 	{
 	    BigInteger sha1 = null;
 	    try {

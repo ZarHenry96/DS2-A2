@@ -30,12 +30,6 @@
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
-				<parameter name="message_loss" displayName="Message loss probability" type="double" 
-						defaultValue="0.05" 
-						isReadOnly="false" 
-						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
-									
-		/>
 		</parameters>
 
 

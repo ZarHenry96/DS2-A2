@@ -33,7 +33,6 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		int seed = params.getInteger("randomSeed");
 		double crash_pr = params.getDouble("crash_pr");
 		double recovery_interval = params.getDouble("recovery_interval");
-		double message_loss = params.getDouble("message_loss");
 		
 		int hash_size = params.getInteger("m");
 		int num_nodes = Double.valueOf(Math.pow(2, hash_size)).intValue();
@@ -61,6 +60,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		this.rnd = new Random(seed);
 		this.all_nodes = new ArrayList<>();
 		for (int i = 0; i < num_nodes; i++) {
+			/*
 			Node node = new Node(
 					network, 
 					this.rnd, 
@@ -69,10 +69,10 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 					center+radius*Math.sin(Math.toRadians((360.0/num_nodes)*i)), 
 					center+radius*Math.cos(Math.toRadians((360.0/num_nodes)*i)),
 					crash_pr, 
-					recovery_interval, 
-					message_loss
+					recovery_interval
 			);
 			this.all_nodes.add(node);
+			*/
 		}
 		
 		active_nodes = new HashSet<>();
