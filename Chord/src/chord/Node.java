@@ -13,7 +13,7 @@ import repast.simphony.util.collections.Pair;
 /**
  * This class defines the behavior of the agents in the simulation 
  */
-public class Node {
+public class Node implements Comparable<Node>{
 	private Network<Object> viewNet;
 	private Random rnd;
 	private int hash_size;
@@ -241,7 +241,7 @@ public class Node {
 	 */
 	public void join(Node n) {
 		this.predecessor = null;
-		this.find_successor(this.id, "finger", 1);
+		//this.find_successor(this.id, "finger", 1);
 		this.subscribed = true;
 		
 		this.schedule_stabilization();
@@ -365,5 +365,10 @@ public class Node {
 	 */
 	public double getY() {
 		return y;
+	}
+
+	@Override
+	public int compareTo(Node node) {
+		return this.id.compareTo(node.getId());
 	}
 }
