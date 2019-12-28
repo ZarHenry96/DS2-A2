@@ -14,8 +14,7 @@ public class Utils {
 		}
 	}
 	
-	public static Integer getHash(String key)
-	{
+	public static Integer getHash(String key) {
 	    BigInteger sha1 = null;
 	    try {
 	        MessageDigest crypt = MessageDigest.getInstance("SHA-1");

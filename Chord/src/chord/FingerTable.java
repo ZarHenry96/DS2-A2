@@ -1,5 +1,7 @@
 package chord;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class FingerTable {
@@ -23,6 +25,25 @@ public class FingerTable {
 	
 	public void removeEntry(int index) {
 		this.table.remove(index);
+	}
+	
+	public void removeEntry(Node dead) {
+		for(int index: this.table.keySet()) {
+			if(this.table.get(index).equals(dead)) {
+				this.table.remove(index);
+			}
+		}
+	}
+	
+	public ArrayList<Integer> getKeys(boolean descending_order) {
+		ArrayList<Integer> keys = new ArrayList<>(this.table.keySet());
+		if(descending_order) {
+			Collections.sort(keys, Collections.reverseOrder());
+		} else {
+			Collections.sort(keys);
+		}
+		
+		return keys;
 	}
 	
 	public void clearTable() {
