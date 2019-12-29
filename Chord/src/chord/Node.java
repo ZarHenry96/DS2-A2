@@ -1,6 +1,7 @@
 package chord;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -82,11 +83,16 @@ public class Node implements Comparable<Node>{
 	/**
 	 * Inserts the node resulting from the execution of find_successor into the right data structure
 	 * @param successor node responsible for the queried id
-	 * @param target_dt target data structure: "finger", "successors" or "lookup"
+	 * @param target_dt target data structure: "init", "finger", "successors" or "lookup"
 	 * @param position position index in the target data structure
 	 */
 	private void setResult(Node successor, String target_dt, int position) {
 		switch(target_dt) {
+			case "init":
+				this.finger.setEntry(position, successor);
+				this.successors.add(successor);
+				this.newData(successor.transferDataUpToKey(this.id));
+				break;
 			case "finger":
 				this.finger.setEntry(position, successor);
 				if(position == 1) {
@@ -116,7 +122,7 @@ public class Node implements Comparable<Node>{
 		for(int i=0; i < finger_indices_desc.size() && candidate == null; i++) {
 			int index = finger_indices_desc.get(i);
 			int node_id = this.finger.getEntry(index).getId();
-			if(node_id > this.id && node_id < target_id) {
+			if(Utils.belongsToInterval(node_id, this.id, target_id) && node_id != target_id) {
 				candidate = this.finger.getEntry(index);
 			}
 		}
@@ -124,14 +130,12 @@ public class Node implements Comparable<Node>{
 		if (candidate == null) {
 			candidate = this;
 		} else {
-			boolean end = false;
-			for(int j=this.successors.size()-1; j>=0 && !end; j--) {
+			boolean best_found = false;
+			for(int j=this.successors.size()-1; j>=0 && !best_found; j--) {
 				Node successor = this.successors.get(j);
-				if(successor.getId() <= candidate.getId()) {
-					end = true;
-				} else if(successor.getId() < target_id) {
+				if(Utils.belongsToInterval(successor.getId(), candidate.getId(), target_id) && successor.getId() != target_id) {
 					candidate = successor;
-					end = true;
+					best_found = true;
 				}
 			}
 		}
@@ -146,7 +150,7 @@ public class Node implements Comparable<Node>{
 	 */
 	public Pair<Boolean, Node> processSuccRequest(int id) {
 		if(this.subscribed && !this.crashed) {
-			if(id > this.id && id <= this.successors.get(0).getId()) {
+			if(Utils.belongsToInterval(id, this.id, this.successors.get(0).getId())) {
 				return new Pair<Boolean, Node>(true, this.successors.get(0));
 			} else {
 				return new Pair<Boolean, Node>(false, this.closest_preceding_node(id));
@@ -175,7 +179,7 @@ public class Node implements Comparable<Node>{
 	 * @param info_source contacted node
 	 * @param prev_info_source node from which the current node has become aware of info_source
 	 * @param id id of interest
-	 * @param target data structure: "finger", "successors" or "lookup"
+	 * @param target data structure: "init", "finger", "successors" or "lookup"
 	 * @param position index in the target data structure
 	 */
 	public void processSuccResponse(Pair<Boolean, Node> response, Node info_source, Node prev_info_source, int id, String target_dt, int position) {
@@ -196,13 +200,13 @@ public class Node implements Comparable<Node>{
 	 * @param target_node node to ask for the given id
 	 * @param info_source node from which the current node has become aware of target_node
 	 * @param id id of interest
-	 * @param target data structure: "finger", "successors" or "lookup"
+	 * @param target data structure: "init", "finger", "successors" or "lookup"
 	 * @param position index in the target data structure
 	 */
 	private void find_successor_step(Node target_node, Node info_source, int id, String target_dt, int position) {
 		Pair<Boolean, Node> return_value = target_node.processSuccRequest(id);
 		
-		double delay = (return_value == null) ? this.maximum_allowed_delay : this.getNextDelay();
+		double delay = (return_value == null) ? this.maximum_allowed_delay : Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
 		
 		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 		ScheduleParameters scheduleParameters = ScheduleParameters
@@ -213,11 +217,11 @@ public class Node implements Comparable<Node>{
 	/**
 	 * Looks for the node responsible for the given identifier 
 	 * @param id id of interest
-	 * @param target_dt target data structure: "finger", "successors" or "lookup"
+	 * @param target_dt target data structure: "init", "finger", "successors" or "lookup"
 	 * @param position index in the target data structure
 	 */
 	public void find_successor(int id, String target_dt, int position) {
-		if(id > this.id && id <= this.successors.get(0).getId()) {
+		if(Utils.belongsToInterval(id, this.id, this.successors.get(0).getId())) {
 			setResult(this.successors.get(0), target_dt, position);
 		} else {
 			this.find_successor_step(this.closest_preceding_node(id), this, id, target_dt, position);
@@ -229,6 +233,7 @@ public class Node implements Comparable<Node>{
 	 */
 	public void create() {
 		this.predecessor = null;
+		this.finger.setEntry(1, this);
 		this.successors.add(this);
 		this.subscribed = true;
 		
@@ -237,11 +242,11 @@ public class Node implements Comparable<Node>{
 	
 	/**
 	 * Joins an existing Chord ring
-	 * @param n reference to a node already in the ring
+	 * @param node reference to a node already in the ring
 	 */
-	public void join(Node n) {
+	public void join(Node node) {
 		this.predecessor = null;
-		//this.find_successor(this.id, "finger", 1);
+		this.find_successor_step(node, this, this.id, "init", 1);
 		this.subscribed = true;
 		
 		this.schedule_stabilization();
@@ -278,19 +283,45 @@ public class Node implements Comparable<Node>{
 	}
 	
 	/**
-	 * Performs the acquisition of data from a leaving node
-	 * @param data the data the caller was responsible for
+	 * Provides the data up to a certain key
+	 * @param target_key the id of interest
+	 * @return the data up to the provided key
 	 */
-	public void transferData(HashMap<Integer, String> data) {
+	public HashMap<Integer, String> transferDataUpToKey(int target_key){
+		HashMap<Integer, String> dataToTransfer = new HashMap<>();
+		
+		ArrayList<Integer> sortedKeys = new ArrayList<Integer>(this.data.keySet());
+		Collections.sort(sortedKeys);
+		
+		boolean done = false;
+		for(int i=0; i < sortedKeys.size() && !done; i++) {
+			int key = sortedKeys.get(i);
+			if(key <= target_key) {
+				dataToTransfer.put(key, this.data.get(key));
+				this.data.remove(key);
+			} else {
+				done = true;
+			}
+		}
+		
+		return dataToTransfer;
+	}
+	
+	/**
+	 * Performs the acquisition of data from another node
+	 * @param data new data
+	 */
+	public void newData(HashMap<Integer, String> data) {
 		this.data.putAll(data);
 	}
 	
 	/**
-	 * Performs the replacement of the predecessor (in case the previous one leaves the node)
+	 * Performs the replacement of the predecessor (in case the previous one leaves the ring)
 	 * @param new_predecessor reference to the new predecessor
 	 */
 	public void setPredecessor(Node new_predecessor) {
 		this.predecessor = new_predecessor;
+		
 	}
 	
 	/**
@@ -309,7 +340,7 @@ public class Node implements Comparable<Node>{
 	public void leave() {
 		if(!successors.isEmpty()) {
 			Node successor = this.successors.get(0);
-			successor.transferData(this.data);
+			successor.newData(this.data);
 			successor.setPredecessor(this.predecessor);
 		}
 		
@@ -324,15 +355,6 @@ public class Node implements Comparable<Node>{
 		this.predecessor = null;
 		
 		this.data.clear();
-	}
-	
-	/**
-	 * Returns the next packet delay, sampled from an exponential distribution with lambda = mean_packet_delay
-	 * @return next packet delay
-	 */
-	private double getNextDelay() {
-		double delay = Math.log(1-this.rnd.nextDouble())/(-this.mean_packet_delay);
-		return delay < this.maximum_allowed_delay ? delay : this.maximum_allowed_delay;
 	}
 	
 	/**
