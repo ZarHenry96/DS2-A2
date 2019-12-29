@@ -42,6 +42,12 @@
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
+				<parameter name="join_interval" displayName="Interval between different join" type="double" 
+						defaultValue="1.0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+									
+		/>
 				<parameter name="init_num_nodes" displayName="Initial number of nodes" type="int" 
 						defaultValue="4" 
 						isReadOnly="false" 
@@ -52,6 +58,12 @@
 						defaultValue="20" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+									
+		/>
+				<parameter name="leave_interval" displayName="Interval between different leave" type="double" 
+						defaultValue="1.0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
 		/>
 				<parameter name="join_amplitude" displayName="Amplitude of node joining" type="int" 
