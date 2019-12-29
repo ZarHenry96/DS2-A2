@@ -185,12 +185,20 @@ public class Node implements Comparable<Node>{
 	 * @param position index in the target data structure
 	 */
 	public void processSuccResponse(Pair<Node, Boolean> response, Node info_source, Node prev_info_source, int id, String target_dt, int position) {
+		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
+		
 		if(response.getFirst() == null) {
 			Node prev_successor = prev_info_source.getPrevSuccessor(info_source, id);
 			if(!prev_successor.equals(prev_info_source)) {
-				this.find_successor_step(prev_successor, prev_info_source, id, target_dt, position);
+				double delay_req = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
+				double delay_resp = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
+				double delay_tot = delay_req+delay_resp;
+				
+				ScheduleParameters scheduleParameters = ScheduleParameters
+						.createOneTime(schedule.getTickCount() + delay_tot/1000);
+				schedule.schedule(scheduleParameters, this, "find_successor_step", prev_successor, prev_info_source, id, target_dt, position);
 			} else {
-				throw new RuntimeException("Error, no successors available for node "+prev_info_source.getId()+"!");
+				throw new RuntimeException("Error, no successor available for node "+prev_info_source.getId()+"!");
 			}
 		} else {
 			if(response.getSecond()) {
@@ -212,11 +220,13 @@ public class Node implements Comparable<Node>{
 	private void find_successor_step(Node target_node, Node info_source, int id, String target_dt, int position) {
 		Pair<Node, Boolean> return_value = target_node.processSuccRequest(id);
 		
-		double delay = (return_value.getFirst() == null) ? this.maximum_allowed_delay : Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
+		double delay_req = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
+		double delay_resp = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
+		double delay_tot = return_value.getFirst() == null ? this.maximum_allowed_delay : delay_req+delay_resp;
 		
 		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 		ScheduleParameters scheduleParameters = ScheduleParameters
-				.createOneTime(schedule.getTickCount() + delay/1000);
+				.createOneTime(schedule.getTickCount() + delay_tot/1000);
 		schedule.schedule(scheduleParameters, this, "processSuccResponse", return_value, target_node, info_source, id, target_dt, position);
 	}
 	
@@ -322,12 +332,22 @@ public class Node implements Comparable<Node>{
 	}
 	
 	/**
-	 * Performs the replacement of the predecessor (in case the previous one leaves the ring)
+	 * Performs the replacement of the predecessor and the acquisition of its data (in case it leaves the ring)
 	 * @param new_predecessor reference to the new predecessor
+	 * @param data new data
 	 */
-	public void setPredecessor(Node new_predecessor) {
+	public void replacePredecessorAndAcquireData(Node new_predecessor, HashMap<Integer, String> data) {
 		this.predecessor = new_predecessor;
-		
+		this.newData(data);
+	}
+	
+	/**
+	 * Performs the reset of the predecessor and the acquisition of its data (in case it leaves the ring)
+	 * @param data new data
+	 */
+	public void resetPredecessorAndAcquireData(HashMap<Integer, String> data) {
+		this.predecessor = null;
+		this.newData(data);
 	}
 	
 	/**
@@ -344,14 +364,23 @@ public class Node implements Comparable<Node>{
 	 * Leaves the Chord ring, informing the successor and the predecessor
 	 */
 	public void leave() {
+		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
+		
 		if(!successors.isEmpty()) {
 			Node successor = this.successors.get(0);
-			successor.newData(this.data);
-			successor.setPredecessor(this.predecessor);
+			ScheduleParameters scheduleParameters = ScheduleParameters
+					.createOneTime(schedule.getTickCount() + Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay));
+			if(!(this.predecessor == null)) {
+				schedule.schedule(scheduleParameters, successor, "replacePredecessorAndAcquireData", this.predecessor, this.data);
+			} else {
+				schedule.schedule(scheduleParameters, successor, "resetPredecessorAndAcquireData", this.data);
+			}
 		}
 		
 		if(!(this.predecessor == null)) {
-			this.predecessor.setLastSuccessor(this.successors.get(this.successors.size()-1));		
+			ScheduleParameters scheduleParameters = ScheduleParameters
+					.createOneTime(schedule.getTickCount() + Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay));
+			schedule.schedule(scheduleParameters, this.predecessor, "setLastSuccessor", this.successors.get(this.successors.size()-1));		
 		}
 		
 		this.subscribed = false;
