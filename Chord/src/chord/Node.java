@@ -146,18 +146,20 @@ public class Node implements Comparable<Node>{
 	/**
 	 * Processes a successor request
 	 * @param id id of interest
-	 * @return pair <Boolean, None> if the node is subscribed and not crashed, null otherwise. The first element of the pair defines if the retrieved node is the one responsible for the given id
+	 * @return pair <Node, Boolean>: the first element is null if the current node is not subscribed or crashed; the second one defines if the retrieved node is the one responsible for the given id
 	 */
-	public Pair<Boolean, Node> processSuccRequest(int id) {
+	public Pair<Node, Boolean> processSuccRequest(int id) {
+		Pair<Node, Boolean> pair = null;
 		if(this.subscribed && !this.crashed) {
 			if(Utils.belongsToInterval(id, this.id, this.successors.get(0).getId())) {
-				return new Pair<Boolean, Node>(true, this.successors.get(0));
+				pair = new Pair<Node, Boolean>(this.successors.get(0), true);
 			} else {
-				return new Pair<Boolean, Node>(false, this.closest_preceding_node(id));
+				pair = new Pair<Node, Boolean>(this.closest_preceding_node(id), false);
 			}
 		} else {
-			return null;
+			pair = new Pair<Node, Boolean>(null, false);
 		}
+		return pair;
 	}
 	
 	/**
@@ -175,22 +177,26 @@ public class Node implements Comparable<Node>{
 	
 	/**
 	 * Processes response to a successor request
-	 * @param response pair <Boolean, Node> returned by the contacted node, null if no response
+	 * @param response pair <Node, Boolean> returned by the contacted node
 	 * @param info_source contacted node
 	 * @param prev_info_source node from which the current node has become aware of info_source
 	 * @param id id of interest
 	 * @param target data structure: "init", "finger", "successors" or "lookup"
 	 * @param position index in the target data structure
 	 */
-	public void processSuccResponse(Pair<Boolean, Node> response, Node info_source, Node prev_info_source, int id, String target_dt, int position) {
-		if(response == null) {
+	public void processSuccResponse(Pair<Node, Boolean> response, Node info_source, Node prev_info_source, int id, String target_dt, int position) {
+		if(response.getFirst() == null) {
 			Node prev_successor = prev_info_source.getPrevSuccessor(info_source, id);
-			this.find_successor_step(prev_successor, prev_info_source, id, target_dt, position);
-		} else {
-			if(response.getFirst()) {
-				this.setResult(response.getSecond(), target_dt, position);
+			if(!prev_successor.equals(prev_info_source)) {
+				this.find_successor_step(prev_successor, prev_info_source, id, target_dt, position);
 			} else {
-				this.find_successor_step(response.getSecond(), info_source, id, target_dt, position);
+				throw new RuntimeException("Error, no successors available for node "+prev_info_source.getId()+"!");
+			}
+		} else {
+			if(response.getSecond()) {
+				this.setResult(response.getFirst(), target_dt, position);
+			} else {
+				this.find_successor_step(response.getFirst(), info_source, id, target_dt, position);
 			}
 		}
 	}
@@ -204,9 +210,9 @@ public class Node implements Comparable<Node>{
 	 * @param position index in the target data structure
 	 */
 	private void find_successor_step(Node target_node, Node info_source, int id, String target_dt, int position) {
-		Pair<Boolean, Node> return_value = target_node.processSuccRequest(id);
+		Pair<Node, Boolean> return_value = target_node.processSuccRequest(id);
 		
-		double delay = (return_value == null) ? this.maximum_allowed_delay : Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
+		double delay = (return_value.getFirst() == null) ? this.maximum_allowed_delay : Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
 		
 		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 		ScheduleParameters scheduleParameters = ScheduleParameters
@@ -392,5 +398,19 @@ public class Node implements Comparable<Node>{
 	@Override
 	public int compareTo(Node node) {
 		return this.id.compareTo(node.getId());
+	}
+	
+	public void debug() {
+		System.out.println("\nNode id: "+this.id);
+		System.out.println("Tick: "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
+		System.out.println("Finger table:"+this.finger);
+		String successors = "[";
+		for(Node succ: this.successors) {
+			successors += " "+succ.getId();
+		}
+		successors+= " ]";
+		System.out.println("Successors: "+successors);
+		System.out.println("Predecessor: "+this.predecessor);
+		System.out.println("Data: "+this.data);
 	}
 }

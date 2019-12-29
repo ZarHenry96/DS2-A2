@@ -5,9 +5,6 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.TreeSet;
 
-import org.apache.commons.lang3.RandomStringUtils;
-
-import net.sf.jasperreports.engine.util.DigestUtils;
 import repast.simphony.context.Context;
 import repast.simphony.context.space.continuous.ContinuousSpaceFactory;
 import repast.simphony.context.space.continuous.ContinuousSpaceFactoryFinder;
@@ -70,8 +67,6 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		this.min_number_leaving = params.getInteger("min_number_leaving");
 		this.leaving_amplitude = params.getInteger("leaving_amplitude")+1; 
 		
-		Utils.setMaxId(hash_size);
-		
 		context.setId("Chord");
 		
 		ContinuousSpaceFactory spaceFactory = ContinuousSpaceFactoryFinder.createContinuousSpaceFactory(null);
@@ -123,18 +118,13 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		// the first batch of join has to be scheduled after the last node insert makes a stabilization, similar the first leave 
 		double first_join = (one_at_time_init ? init_num_nodes*insertion_delay+(stab_offset+stab_amplitude) : (stab_offset+stab_amplitude)) + join_interval;
 		double first_leave = (one_at_time_init ? init_num_nodes*insertion_delay+(stab_offset+stab_amplitude) : (stab_offset+stab_amplitude)) + leave_interval;
-		System.out.println(first_join);
-		System.out.println(first_leave);
+		//System.out.println(first_join);
+		//System.out.println(first_leave);
 		ScheduleParameters scheduleParamsJoin = ScheduleParameters.createRepeating(first_join, join_interval);
 		ScheduleParameters scheduleParamsleave = ScheduleParameters.createRepeating(first_leave, leave_interval);
 		
 		schedule.schedule(scheduleParamsJoin, this, "join_new_nodes", context, space);
 		schedule.schedule(scheduleParamsleave, this, "leaving_nodes", context, space);
-		/*
-		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
-		ScheduleParameters scheduleParams = ScheduleParameters.createRepeating(start, interval);
-		schedule.schedule(scheduleParams, this, "");
-		*/
 		
 		return context;
 	}
@@ -148,7 +138,6 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	 * @param space the 2D space where add nodes
 	 */
 	public void one_at_time_init(int init_num_nodes, double insertion_delay, Context<Object> context, ContinuousSpace<Object> space) {
-		
 		Node node = this.all_nodes.get(this.rnd.nextInt(this.all_nodes.size()));
 		if(!this.active_nodes.contains(node)) {
 			this.active_nodes.add(node);
@@ -216,7 +205,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 				context.add(rndNode);
 				space.moveTo(rndNode, rndNode.getX(), rndNode.getY());
 				Node succ_node = rndNode;
-				while (succ_node.equals(rndNode) && !new_join_ids.contains(rndNode.getId())){
+				while (succ_node.equals(rndNode) && new_join_ids.contains(rndNode.getId())){
 					succ_node = (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
 				}
 				rndNode.join(succ_node);
@@ -239,6 +228,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		for(int i = 0; i < exiting_nodes_number; i++) {
 			Node rndNode =  (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
 			rndNode.leave();
+			System.out.println("Leaving!!! "+rndNode.getId());
 			context.remove(rndNode);
 			this.active_nodes.remove(rndNode);
 		}

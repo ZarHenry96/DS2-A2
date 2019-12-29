@@ -49,4 +49,16 @@ public class FingerTable {
 	public void clearTable() {
 		this.table.clear();
 	}
+	
+	@Override
+	public String toString() {
+		String out = "";
+		
+		ArrayList<Integer> keys = this.getKeys(false);
+		for(int key: keys) {
+			out += "\n\t"+key+"\t"+this.table.get(key).getId();
+		}
+		
+		return out;
+	}
 }

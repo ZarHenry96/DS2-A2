@@ -7,13 +7,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
 public class Utils {
-	private static Integer maxId = null;
-	
-	public static void setMaxId(Integer hashSize) {
-		if (Utils.maxId == null) {
-			Utils.maxId = Double.valueOf(Math.pow(2,hashSize)).intValue();
-		}
-	}
 	
 	public static Integer getHash(String key, int hashSize) {
 		Integer maxValue = Double.valueOf(Math.pow(2,hashSize)).intValue();
