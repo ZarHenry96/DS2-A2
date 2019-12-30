@@ -1,9 +1,13 @@
 package chord;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.TreeSet;
+
+import org.apache.commons.lang3.RandomStringUtils;
 
 import repast.simphony.context.Context;
 import repast.simphony.context.space.continuous.ContinuousSpaceFactory;
@@ -29,7 +33,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	private int join_amplitude;
 	private int min_number_leaving;
 	private int leaving_amplitude;
-	
+	private HashSet<Integer> keys = new HashSet<>();
 	
 	/**
 	 * Repast constructor loads the simulation parameters, init nodes and chord ring and finally schedules joins and leaves. 
@@ -58,6 +62,11 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		int init_num_nodes = params.getInteger("init_num_nodes");		
 		boolean one_at_time_init = params.getBoolean("one_at_time_init");
 		double insertion_delay = params.getDouble("insertion_delay");
+		
+		int data_size = params.getInteger("data_size");
+		int key_size = params.getInteger("key_size") > data_size ?  data_size : params.getInteger("key_size");
+		int total_number_data = params.getInteger("total_number_data");
+		
 		
 		double join_interval = params.getDouble("join_interval");
 		this.min_number_joins = params.getInteger("min_number_joins");
@@ -113,11 +122,16 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 			preloaded_configuration(init_num_nodes, context, space);
 		}
 		
+		
 		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 		
-		// the first batch of join has to be scheduled after the last node insert makes a stabilization, similar the first leave 
-		double first_join = (one_at_time_init ? init_num_nodes*insertion_delay+(stab_offset+stab_amplitude) : (stab_offset+stab_amplitude)) + join_interval;
-		double first_leave = (one_at_time_init ? init_num_nodes*insertion_delay+(stab_offset+stab_amplitude) : (stab_offset+stab_amplitude)) + leave_interval;
+		double data_gen = (one_at_time_init ? init_num_nodes*insertion_delay+(stab_offset+stab_amplitude) : (stab_offset+stab_amplitude));
+		ScheduleParameters scheduleParamsDataGen = ScheduleParameters.createOneTime(data_gen);
+		schedule.schedule(scheduleParamsDataGen, this, "data_generation", hash_size, key_size, data_size, total_number_data);
+		
+		// the first batch of join has to be scheduled after the last node insert makes a stabilization and after the data generation, similar the first leave 
+		double first_join = (one_at_time_init ? init_num_nodes*insertion_delay+(stab_offset+stab_amplitude)+1 : (stab_offset+stab_amplitude)) + join_interval+1;
+		double first_leave = (one_at_time_init ? init_num_nodes*insertion_delay+(stab_offset+stab_amplitude)+1 : (stab_offset+stab_amplitude)) + leave_interval+1;
 		//System.out.println(first_join);
 		//System.out.println(first_leave);
 		ScheduleParameters scheduleParamsJoin = ScheduleParameters.createRepeating(first_join, join_interval);
@@ -183,7 +197,33 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		}
 		
 	}
-
+	
+	public void data_generation(int m, int key_size, int data_size, int total_number_data) {
+		RandomStringUtils rndString = new RandomStringUtils();
+		
+		while(this.keys.size() != total_number_data) {
+			String data = rndString.random(data_size);
+			String key = data.substring(0, key_size);
+			Integer hashKey = Utils.getHash(key, m);
+			if(! this.keys.contains(hashKey)) {
+				this.keys.add(hashKey);
+				HashMap<Integer, String> dataMap = new HashMap<>();
+				dataMap.put(hashKey, data);
+				Iterator it = this.active_nodes.iterator();
+				Boolean find = false;
+				while(it.hasNext() && !find) {
+					Node node = (Node)it.next();
+					if (node.getId() >= hashKey) {
+						node.newData(dataMap);
+						find = true;
+					}
+				}
+				if(find == false) { //there are no node with an id greater than the hashKey so goes to the first node
+					this.active_nodes.first().newData(dataMap);
+				}
+			}
+		}
+	}
 	
 	/**
 	 * This method is in charge to add a variable number of nodes (between min_number_joins and this.min_number_joins + join_amplitude) in the chord ring periodically, 
@@ -233,5 +273,6 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 			this.active_nodes.remove(rndNode);
 		}
 	}
+	
 }
 

@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <parameters>
-					<parameter name="leaving_amplitude" displayName="Amplitude of node leaving" type="int" 
+					<parameter name="data_size" displayName="Lenght of the data" type="int" 
+						defaultValue="10" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+									
+		/>
+				<parameter name="leaving_amplitude" displayName="Amplitude of node leaving" type="int" 
 						defaultValue="1" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
@@ -66,6 +72,12 @@
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
 		/>
+				<parameter name="total_number_data" displayName="Total number of data" type="int" 
+						defaultValue="10" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+									
+		/>
 				<parameter name="join_amplitude" displayName="Amplitude of node joining" type="int" 
 						defaultValue="1" 
 						isReadOnly="false" 
@@ -94,6 +106,12 @@
 						defaultValue="30.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+									
+		/>
+				<parameter name="key_size" displayName="Lenght of the key (not hashed)" type="int" 
+						defaultValue="5" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
 		</parameters>
