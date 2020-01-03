@@ -1,6 +1,6 @@
 package chord;
 
-import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Random;
@@ -31,9 +31,10 @@ public class Node implements Comparable<Node>{
 	private double recovery_interval;
 	
 	private FingerTable finger;
-	private ArrayList<Node> successors;
+	private CopyOnWriteArrayList<Node> successors;
 	private int successors_size;
 	private Node predecessor;
+	private int next;
 	
 	private double stab_offset;
 	private int stab_amplitude;
@@ -70,9 +71,10 @@ public class Node implements Comparable<Node>{
 		this.recovery_interval = recovery_interval;
 		
 		this.finger = new FingerTable(hash_size);
-		this.setSuccessors(new ArrayList<>());
+		this.setSuccessors(new CopyOnWriteArrayList<>());
 		this.successors_size = successors_size;
 		this.setPredecessor(null);
+		this.next = 0;
 		
 		this.stab_offset = stab_offset;
 		this.stab_amplitude = stab_amplitude+1;
@@ -118,7 +120,7 @@ public class Node implements Comparable<Node>{
 	private Node closest_preceding_node(int target_id) {
 		Node candidate = null;
 		
-		ArrayList<Integer> finger_indices_desc = this.finger.getKeys(true);
+		CopyOnWriteArrayList<Integer> finger_indices_desc = this.finger.getKeys(true);
 		for(int i=0; i < finger_indices_desc.size() && candidate == null; i++) {
 			int index = finger_indices_desc.get(i);
 			int node_id = this.finger.getEntry(index).getId();
@@ -198,7 +200,8 @@ public class Node implements Comparable<Node>{
 						.createOneTime(schedule.getTickCount() + delay_tot/1000);
 				schedule.schedule(scheduleParameters, this, "find_successor_step", prev_successor, prev_info_source, id, target_dt, position);
 			} else {
-				throw new RuntimeException("Error, no successor available for node "+prev_info_source.getId()+"!");
+				//throw new RuntimeException("Error, no successor available for node "+prev_info_source.getId()+"!");
+				System.err.println("Error, no successor available for node "+prev_info_source.getId()+"!");
 			}
 		} else {
 			if(response.getSecond()) {
@@ -237,10 +240,12 @@ public class Node implements Comparable<Node>{
 	 * @param position index in the target data structure
 	 */
 	public void find_successor(int id, String target_dt, int position) {
-		if(Utils.belongsToInterval(id, this.id, this.successors.get(0).getId())) {
-			setResult(this.successors.get(0), target_dt, position);
-		} else {
-			this.find_successor_step(this.closest_preceding_node(id), this, id, target_dt, position);
+		if (!this.successors.isEmpty()) {//TODO is this correct?
+			if(Utils.belongsToInterval(id, this.id, this.successors.get(0).getId())) {
+				setResult(this.successors.get(0), target_dt, position);
+			} else {
+				this.find_successor_step(this.closest_preceding_node(id), this, id, target_dt, position);
+			}
 		}
 	}
 	
@@ -277,7 +282,7 @@ public class Node implements Comparable<Node>{
 		this.successors.add(successor);
 		this.subscribed = true;
 		
-		this.schedule_stabilization();
+		//this.schedule_stabilization();
 	}
 	
 	
@@ -289,14 +294,15 @@ public class Node implements Comparable<Node>{
 	public void stabilization(int retryCount) {
 		Node suc = null;
 		try {
-			suc = this.successors.get(retryCount);
-		} catch (IndexOutOfBoundsException e) {
-			throw new RuntimeException("Error, all successors are dead or disconnected, cannot stabilyze!");
+			suc = this.successors.get(retryCount); 
+		} catch (IndexOutOfBoundsException e) { //TODO issues to investigate
+			//throw new RuntimeException("Node "+this.id+": Error! All successors are dead or disconnected, cannot stabilyze!");
+			System.err.println("Node "+this.id+": Error! All successors are dead or disconnected, cannot stabilyze!");
 		} 
 		
 		if (suc!=null) {
 			double delay_req = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
-			Pair<Node, ArrayList<Node>> return_value = suc.processStabRequest(this,delay_req);
+			Pair<Node, CopyOnWriteArrayList<Node>> return_value = suc.processStabRequest(this,delay_req);
 				
 			double delay_resp = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
 			double delay_tot = return_value.getFirst() == null ? this.maximum_allowed_delay : delay_req+delay_resp;
@@ -313,22 +319,25 @@ public class Node implements Comparable<Node>{
 		}
 		
 		this.schedule_stabilization(); //schedule next stabilization
+		
+		this.fix_fingers();
+		this.check_predecessor();
 	}
 	
 	/**
 	 * Responds to the stabilization request from another node
 	 * @return a pair type containing the node itself and its successors, or (null,null) if not sub or crashed
 	 */
-	public Pair<Node, ArrayList<Node>> processStabRequest(Node pred, double set_pred_delay) {
+	public Pair<Node, CopyOnWriteArrayList<Node>> processStabRequest(Node pred, double set_pred_delay) {
 		if(this.subscribed && !this.crashed) {
 			ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 			ScheduleParameters scheduleParameters = ScheduleParameters
 					.createOneTime(schedule.getTickCount() + set_pred_delay/1000);
 			schedule.schedule(scheduleParameters, this, "setPredecessor", pred);
 			
-			return new Pair<Node, ArrayList<Node>>(this,this.successors);
+			return new Pair<Node, CopyOnWriteArrayList<Node>>(this,this.successors);
 		} else {
-			return new Pair<Node, ArrayList<Node>>(null,null);
+			return new Pair<Node, CopyOnWriteArrayList<Node>>(null,null);
 		}		
 	}
 
@@ -336,11 +345,11 @@ public class Node implements Comparable<Node>{
 	 * Manage the response of a stabilization request, updating the successors list, eventually asking the following successor in case the immediate ones is not available anymore
 	 * @param pair of responding node and its successors list
 	 */
-	public void processStabResponse(Pair<Node, ArrayList<Node>> stabResponse) {
+	public void processStabResponse(Pair<Node, CopyOnWriteArrayList<Node>> stabResponse) {
 		System.out.println("Tick "+ RunEnvironment.getInstance().getCurrentSchedule().getTickCount() +", Node " +this.id.toString() + 
 				": \n\treceived stabresponse from "+ stabResponse.getFirst().id.toString() + ": " + stabResponse.getSecond().toString());
 		if (stabResponse.getFirst() != null) {
-			ArrayList<Node> updatedSucc = new ArrayList<>();
+			CopyOnWriteArrayList<Node> updatedSucc = new CopyOnWriteArrayList<>();
 			updatedSucc.add(stabResponse.getFirst());		//add the immediate successor
 			updatedSucc.addAll(stabResponse.getSecond());	//attach its successors
 			updatedSucc.remove(updatedSucc.size()-1);		//pop the last one
@@ -363,6 +372,34 @@ public class Node implements Comparable<Node>{
 		schedule.schedule(scheduleParameters, this, "stabilization",0);
 	}
 	
+	public void check_predecessor() {
+		if (this.predecessor != null) {
+			boolean down = (this.predecessor.crashed || !this.predecessor.subscribed);
+			double delay_req = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);			
+			double delay_resp = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
+			double delay_tot = down ? this.maximum_allowed_delay : delay_req+delay_resp;
+			
+			if (down) {
+				System.out.println("Node "+this.id+": predecessor is down, scheduling its setting to null");
+				ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
+				ScheduleParameters scheduleParameters = ScheduleParameters
+						.createOneTime(schedule.getTickCount() + delay_tot/1000);
+				Node nonode = null;
+				schedule.schedule(scheduleParameters, this, "setPredecessor", nonode);
+			}
+		}
+	}
+	
+	public void fix_fingers() {
+		if (this.next >= this.hash_size) {
+			this.next = 0;
+		}
+		
+		this.find_successor(this.id + (int) Math.pow(2, next-1), "finger", next);	
+
+		this.next++;
+	}
+	
 	/**
 	 * Provides the data up to a certain key
 	 * @param target_key the id of interest
@@ -371,7 +408,7 @@ public class Node implements Comparable<Node>{
 	public HashMap<Integer, String> transferDataUpToKey(int target_key){
 		HashMap<Integer, String> dataToTransfer = new HashMap<>();
 		
-		ArrayList<Integer> sortedKeys = new ArrayList<Integer>(this.data.keySet());
+		CopyOnWriteArrayList<Integer> sortedKeys = new CopyOnWriteArrayList<Integer>(this.data.keySet());
 		Collections.sort(sortedKeys);
 		
 		boolean done = false;
@@ -508,7 +545,7 @@ public class Node implements Comparable<Node>{
 		System.out.println("Data: "+this.data);
 	}
 
-	private void setSuccessors(ArrayList<Node> successors) {
+	private void setSuccessors(CopyOnWriteArrayList<Node> successors) {
 		this.successors = successors;
 	}
 

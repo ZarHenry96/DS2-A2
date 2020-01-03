@@ -1,16 +1,16 @@
 package chord;
 
-import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FingerTable {
 	private int size;
-	private HashMap<Integer, Node> table;
+	private ConcurrentHashMap<Integer, Node> table;
 	
 	public FingerTable(int size) {
 		this.size = size;
-		this.table = new HashMap<>();
+		this.table = new ConcurrentHashMap<>();
 	}
 	
 	public Node getEntry(int index) {
@@ -35,8 +35,8 @@ public class FingerTable {
 		}
 	}
 	
-	public ArrayList<Integer> getKeys(boolean descending_order) {
-		ArrayList<Integer> keys = new ArrayList<>(this.table.keySet());
+	public CopyOnWriteArrayList<Integer> getKeys(boolean descending_order) {
+		CopyOnWriteArrayList<Integer> keys = new CopyOnWriteArrayList<>(this.table.keySet());
 		if(descending_order) {
 			Collections.sort(keys, Collections.reverseOrder());
 		} else {
@@ -54,7 +54,7 @@ public class FingerTable {
 	public String toString() {
 		String out = "";
 		
-		ArrayList<Integer> keys = this.getKeys(false);
+		CopyOnWriteArrayList<Integer> keys = this.getKeys(false);
 		for(int key: keys) {
 			out += "\n\t"+key+"\t"+this.table.get(key).getId();
 		}
