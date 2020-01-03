@@ -132,8 +132,8 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		// the first batch of join has to be scheduled after the last node insert makes a stabilization and after the data generation, similar the first leave 
 		double first_join = (one_at_time_init ? init_num_nodes*insertion_delay+(stab_offset+stab_amplitude)+1 : (stab_offset+stab_amplitude)) + join_interval+1;
 		double first_leave = (one_at_time_init ? init_num_nodes*insertion_delay+(stab_offset+stab_amplitude)+1 : (stab_offset+stab_amplitude)) + leave_interval+1;
-		//System.out.println(first_join);
-		//System.out.println(first_leave);
+		System.out.println("first join "+first_join);
+		System.out.println("first leave "+first_leave);
 		ScheduleParameters scheduleParamsJoin = ScheduleParameters.createRepeating(first_join, join_interval);
 		ScheduleParameters scheduleParamsleave = ScheduleParameters.createRepeating(first_leave, leave_interval);
 		
@@ -248,6 +248,9 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 				while (succ_node.equals(rndNode) && new_join_ids.contains(rndNode.getId())){
 					succ_node = (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
 				}
+
+				System.out.println("joining "+rndNode.getId());
+				System.out.println("joining with "+succ_node.getId());
 				rndNode.join(succ_node);
 			}
 		}
@@ -270,7 +273,9 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 			rndNode.leave();
 			System.out.println("Leaving!!! "+rndNode.getId());
 			context.remove(rndNode);
+			System.out.println(this.active_nodes.size());
 			this.active_nodes.remove(rndNode);
+			System.out.println(this.active_nodes.size());
 		}
 	}
 	

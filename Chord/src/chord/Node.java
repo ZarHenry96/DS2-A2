@@ -188,26 +188,27 @@ public class Node implements Comparable<Node>{
 	 */
 	public void processSuccResponse(Pair<Node, Boolean> response, Node info_source, Node prev_info_source, int id, String target_dt, int position) {
 		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
-		
-		if(response.getFirst() == null) {
-			Node prev_successor = prev_info_source.getPrevSuccessor(info_source, id);
-			if(!prev_successor.equals(prev_info_source)) {
-				double delay_req = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
-				double delay_resp = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
-				double delay_tot = delay_req+delay_resp;
-				
-				ScheduleParameters scheduleParameters = ScheduleParameters
-						.createOneTime(schedule.getTickCount() + delay_tot/1000);
-				schedule.schedule(scheduleParameters, this, "find_successor_step", prev_successor, prev_info_source, id, target_dt, position);
+		if(this.subscribed && !this.crashed) {
+			if(response.getFirst() == null) {
+				Node prev_successor = prev_info_source.getPrevSuccessor(info_source, id);
+				if(!prev_successor.equals(prev_info_source)) {
+					double delay_req = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
+					double delay_resp = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
+					double delay_tot = delay_req+delay_resp;
+					
+					ScheduleParameters scheduleParameters = ScheduleParameters
+							.createOneTime(schedule.getTickCount() + delay_tot/1000);
+					schedule.schedule(scheduleParameters, this, "find_successor_step", prev_successor, prev_info_source, id, target_dt, position);
+				} else {
+					//throw new RuntimeException("Error, no successor available for node "+prev_info_source.getId()+"!");
+					System.err.println("Error, no successor available for node "+prev_info_source.getId()+"!");
+				}
 			} else {
-				//throw new RuntimeException("Error, no successor available for node "+prev_info_source.getId()+"!");
-				System.err.println("Error, no successor available for node "+prev_info_source.getId()+"!");
-			}
-		} else {
-			if(response.getSecond()) {
-				this.setResult(response.getFirst(), target_dt, position);
-			} else {
-				this.find_successor_step(response.getFirst(), info_source, id, target_dt, position);
+				if(response.getSecond()) {
+					this.setResult(response.getFirst(), target_dt, position);
+				} else {
+					this.find_successor_step(response.getFirst(), info_source, id, target_dt, position);
+				}
 			}
 		}
 	}
@@ -282,7 +283,7 @@ public class Node implements Comparable<Node>{
 		this.successors.add(successor);
 		this.subscribed = true;
 		
-		//this.schedule_stabilization();
+		this.schedule_stabilization();
 	}
 	
 	
@@ -292,36 +293,38 @@ public class Node implements Comparable<Node>{
 	 * @throws RuntimeException if all successor have been contacted with no luck
 	 */
 	public void stabilization(int retryCount) {
-		Node suc = null;
-		try {
-			suc = this.successors.get(retryCount); 
-		} catch (IndexOutOfBoundsException e) { //TODO issues to investigate
-			//throw new RuntimeException("Node "+this.id+": Error! All successors are dead or disconnected, cannot stabilyze!");
-			System.err.println("Node "+this.id+": Error! All successors are dead or disconnected, cannot stabilyze!");
-		} 
-		
-		if (suc!=null) {
-			double delay_req = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
-			Pair<Node, CopyOnWriteArrayList<Node>> return_value = suc.processStabRequest(this,delay_req);
-				
-			double delay_resp = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
-			double delay_tot = return_value.getFirst() == null ? this.maximum_allowed_delay : delay_req+delay_resp;
+		if(this.subscribed && !this.crashed) {
+			Node suc = null;
+			try {
+				suc = this.successors.get(retryCount); 
+			} catch (IndexOutOfBoundsException e) { //TODO issues to investigate
+				//throw new RuntimeException("Node "+this.id+": Error! All successors are dead or disconnected, cannot stabilyze!");
+				System.err.println("Node "+this.id+": Error! All successors are dead or disconnected, cannot stabilyze! "+this.successors);
+			} 
 			
-			ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
-			ScheduleParameters scheduleParameters = ScheduleParameters
-					.createOneTime(schedule.getTickCount() + delay_tot/1000);
-		
-			if (return_value.getFirst() != null) {
-				schedule.schedule(scheduleParameters, this, "processStabResponse", return_value);
-			} else { //in this case the value is maximum_allowed_delay for sure, so it retries on timeout
-				schedule.schedule(scheduleParameters, this, "stabilization", retryCount+1);		
+			if (suc!=null) {
+				double delay_req = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
+				Pair<Node, CopyOnWriteArrayList<Node>> return_value = suc.processStabRequest(this,delay_req);
+					
+				double delay_resp = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
+				double delay_tot = return_value.getFirst() == null ? this.maximum_allowed_delay : delay_req+delay_resp;
+				
+				ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
+				ScheduleParameters scheduleParameters = ScheduleParameters
+						.createOneTime(schedule.getTickCount() + delay_tot/1000);
+			
+				if (return_value.getFirst() != null) {
+					schedule.schedule(scheduleParameters, this, "processStabResponse", return_value);
+				} else { //in this case the value is maximum_allowed_delay for sure, so it retries on timeout
+					schedule.schedule(scheduleParameters, this, "stabilization", retryCount+1);		
+				}
 			}
+			
+			this.schedule_stabilization(); //schedule next stabilization
+			
+			this.fix_fingers();
+			this.check_predecessor();
 		}
-		
-		this.schedule_stabilization(); //schedule next stabilization
-		
-		this.fix_fingers();
-		this.check_predecessor();
 	}
 	
 	/**
@@ -364,12 +367,15 @@ public class Node implements Comparable<Node>{
 	 * Schedules the next stabilization step according to the given offset and amplitude
 	 */
 	public void schedule_stabilization() {
-		System.out.println("Tick "+ RunEnvironment.getInstance().getCurrentSchedule().getTickCount() +", Node " +this.id.toString() + ": scheduling stabilization");
-		this.debug();
-		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
-		ScheduleParameters scheduleParameters = ScheduleParameters
-				.createOneTime(schedule.getTickCount() + this.stab_offset + rnd.nextInt(this.stab_amplitude));
-		schedule.schedule(scheduleParameters, this, "stabilization",0);
+		if(this.subscribed && !this.crashed) {
+			this.debug();
+			ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
+			double scheduledTick = this.stab_offset + rnd.nextInt(this.stab_amplitude);
+			System.out.println("Tick "+ RunEnvironment.getInstance().getCurrentSchedule().getTickCount() +", Node " +this.id.toString() + ": scheduling stabilization at "+(schedule.getTickCount() + scheduledTick));
+			ScheduleParameters scheduleParameters = ScheduleParameters
+					.createOneTime(schedule.getTickCount() + scheduledTick);
+			schedule.schedule(scheduleParameters, this, "stabilization",0);
+		}
 	}
 	
 	public void check_predecessor() {
@@ -457,9 +463,13 @@ public class Node implements Comparable<Node>{
 	 * @param lastSuccessor the new last successor
 	 */
 	public void setLastSuccessor(Node lastSuccessor) {
-		this.successors.remove(0);
-		this.successors.add(lastSuccessor);
-		this.finger.setEntry(1, this.successors.get(0));
+		if(this.subscribed && !this.crashed) {
+			this.successors.remove(0);
+			this.successors.add(lastSuccessor);
+			this.finger.setEntry(1, this.successors.get(0));
+		}else {
+			System.out.println("this node "+this.id+" is subscribed "+this.subscribed+" or crashed "+this.crashed);
+		}
 	}
 	
 	/**
@@ -480,6 +490,9 @@ public class Node implements Comparable<Node>{
 		}
 		
 		if(!(this.predecessor == null)) {
+			System.out.println("+++++++++++");
+			this.debug();
+			System.out.println("+++++++++++");
 			ScheduleParameters scheduleParameters = ScheduleParameters
 					.createOneTime(schedule.getTickCount() + Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay));
 			schedule.schedule(scheduleParameters, this.predecessor, "setLastSuccessor", this.successors.get(this.successors.size()-1));		
@@ -533,6 +546,8 @@ public class Node implements Comparable<Node>{
 	
 	public void debug() {
 		System.out.println("\nNode id: "+this.id);
+		System.out.println("\nSubscribe: "+this.subscribed);
+		System.out.println("\nDown: "+this.crashed);
 		System.out.println("Tick: "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
 		System.out.println("Finger table:"+this.finger);
 		String successors = "[";
