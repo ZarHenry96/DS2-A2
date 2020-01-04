@@ -68,7 +68,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		int total_number_data = params.getInteger("total_number_data");
 		
 		
-		double join_interval = params.getDouble("join_interval");
+		double join_interval = params.getDouble("join_interval") > stab_offset+stab_amplitude ? params.getDouble("join_interval") : stab_offset+stab_amplitude+1; //the joins of new node MUST happens after at least a stab.
 		this.min_number_joins = params.getInteger("min_number_joins");
 		this.join_amplitude = params.getInteger("join_amplitude")+1; 
 		
@@ -130,15 +130,13 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		schedule.schedule(scheduleParamsDataGen, this, "data_generation", hash_size, key_size, data_size, total_number_data);
 		
 		// the first batch of join has to be scheduled after the last node insert makes a stabilization and after the data generation, similar the first leave 
-		double first_join = (one_at_time_init ? init_num_nodes*insertion_delay+(stab_offset+stab_amplitude)+1 : (stab_offset+stab_amplitude)) + join_interval+1;
 		double first_leave = (one_at_time_init ? init_num_nodes*insertion_delay+(stab_offset+stab_amplitude)+1 : (stab_offset+stab_amplitude)) + leave_interval+1;
-		System.out.println("first join "+first_join);
 		System.out.println("first leave "+first_leave);
-		ScheduleParameters scheduleParamsJoin = ScheduleParameters.createRepeating(first_join, join_interval);
+
 		ScheduleParameters scheduleParamsleave = ScheduleParameters.createRepeating(first_leave, leave_interval);
 		
-		schedule.schedule(scheduleParamsJoin, this, "join_new_nodes", context, space);
-		schedule.schedule(scheduleParamsleave, this, "leaving_nodes", context, space);
+
+		schedule.schedule(scheduleParamsleave, this, "leaving_nodes", context, space, join_interval);
 		
 		return context;
 	}
@@ -199,10 +197,9 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	}
 	
 	public void data_generation(int m, int key_size, int data_size, int total_number_data) {
-		RandomStringUtils rndString = new RandomStringUtils();
-		
 		while(this.keys.size() != total_number_data) {
-			String data = rndString.random(data_size);
+			String data = RandomStringUtils.randomAlphabetic(data_size);
+			System.out.println(data);
 			String key = data.substring(0, key_size);
 			Integer hashKey = Utils.getHash(key, m);
 			if(! this.keys.contains(hashKey)) {
@@ -228,8 +225,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	/**
 	 * This method is in charge to add a variable number of nodes (between min_number_joins and this.min_number_joins + join_amplitude) in the chord ring periodically, 
 	 * if all the available nodes are inserted no new nodes are inserted. 
-	 * To ensure that the nodes in the ring are correctly the first call is scheduled after stab_offset+stab_amplitude tick after the last node join in the initialization phase.
-	 * After the first call the method is scheduled every join_interval
+	 * To ensure that the nodes in the ring are correctly this is scheduled after stab_offset+stab_amplitude tick after each leave phase.
 	 * @param context the context where add nodes
 	 * @param space the 2D space where add nodes
 	 */
@@ -265,7 +261,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	 * @param context
 	 * @param space
 	 */
-	public void leaving_nodes(Context<Object> context, ContinuousSpace<Object> space) {
+	public void leaving_nodes(Context<Object> context, ContinuousSpace<Object> space, double join_interval) {
 		int exiting_nodes_number = this.min_number_leaving + this.rnd.nextInt(this.leaving_amplitude);
 		exiting_nodes_number = exiting_nodes_number >= this.active_nodes.size() ? this.active_nodes.size() - 1 : exiting_nodes_number;
 		for(int i = 0; i < exiting_nodes_number; i++) {
@@ -277,6 +273,12 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 			this.active_nodes.remove(rndNode);
 			System.out.println(this.active_nodes.size());
 		}
+		
+		
+		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
+		ScheduleParameters scheduleParamsJoin = ScheduleParameters.createOneTime(join_interval);
+		schedule.schedule(scheduleParamsJoin, this, "join_new_nodes", context, space);
+		
 	}
 	
 }
