@@ -25,6 +25,7 @@ public class Node implements Comparable<Node>{
 	private double x;
 	private double y;
 	
+	private boolean alone;
 	private boolean subscribed;
 	private boolean crashed;
 	private double crash_pr;
@@ -64,6 +65,7 @@ public class Node implements Comparable<Node>{
 		this.x = x;
 		this.y = y;
 		
+		this.alone = false;
 		this.subscribed = false;
 		this.crashed = false;
 		
@@ -73,8 +75,8 @@ public class Node implements Comparable<Node>{
 		this.finger = new FingerTable(hash_size);
 		this.setSuccessors(new CopyOnWriteArrayList<>());
 		this.successors_size = successors_size;
-		this.setPredecessor(null);
-		this.next = 0;
+		this.resetPredecessor();
+		this.next = 1;
 		
 		this.stab_offset = stab_offset;
 		this.stab_amplitude = stab_amplitude+1;
@@ -241,12 +243,10 @@ public class Node implements Comparable<Node>{
 	 * @param position index in the target data structure
 	 */
 	public void find_successor(int id, String target_dt, int position) {
-		if (!this.successors.isEmpty()) {//TODO is this correct?
-			if(Utils.belongsToInterval(id, this.id, this.successors.get(0).getId())) {
-				setResult(this.successors.get(0), target_dt, position);
-			} else {
-				this.find_successor_step(this.closest_preceding_node(id), this, id, target_dt, position);
-			}
+		if(Utils.belongsToInterval(id, this.id, this.successors.get(0).getId())) {
+			setResult(this.successors.get(0), target_dt, position);
+		} else {
+			this.find_successor_step(this.closest_preceding_node(id), this, id, target_dt, position);
 		}
 	}
 	
@@ -254,10 +254,11 @@ public class Node implements Comparable<Node>{
 	 * Creates a new Chord ring
 	 */
 	public void create() {
-		this.setPredecessor(null);
+		this.resetPredecessor();
 		this.finger.setEntry(1, this);
 		this.successors.add(this);
 		this.subscribed = true;
+		this.alone = true;
 		
 		this.schedule_stabilization();
 	}
@@ -267,7 +268,7 @@ public class Node implements Comparable<Node>{
 	 * @param node reference to a node already in the ring
 	 */
 	public void join(Node node) {
-		this.setPredecessor(null);
+		this.resetPredecessor();
 		this.find_successor_step(node, this, this.id, "init", 1);
 		this.subscribed = true;
 		
@@ -279,7 +280,7 @@ public class Node implements Comparable<Node>{
 	 * @param n successor node
 	 */
 	public void setSuccessor(Node successor) {
-		this.setPredecessor(null);
+		this.resetPredecessor();
 		this.successors.add(successor);
 		this.subscribed = true;
 		
@@ -302,7 +303,7 @@ public class Node implements Comparable<Node>{
 				System.err.println("Node "+this.id+": Error! All successors are dead or disconnected, cannot stabilyze! "+this.successors);
 			} 
 			
-			if (suc!=null) {
+			if (suc!=null && !suc.equals(this)) {
 				double delay_req = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
 				Pair<Node, CopyOnWriteArrayList<Node>> return_value = suc.processStabRequest(this,delay_req);
 					
@@ -315,15 +316,13 @@ public class Node implements Comparable<Node>{
 			
 				if (return_value.getFirst() != null) {
 					schedule.schedule(scheduleParameters, this, "processStabResponse", return_value);
+					this.schedule_stabilization(); //schedule next stabilization
 				} else { //in this case the value is maximum_allowed_delay for sure, so it retries on timeout
 					schedule.schedule(scheduleParameters, this, "stabilization", retryCount+1);		
 				}
+			} else {
+				this.schedule_stabilization(); //schedule next stabilization
 			}
-			
-			this.schedule_stabilization(); //schedule next stabilization
-			
-			this.fix_fingers();
-			this.check_predecessor();
 		}
 	}
 	
@@ -336,7 +335,7 @@ public class Node implements Comparable<Node>{
 			ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 			ScheduleParameters scheduleParameters = ScheduleParameters
 					.createOneTime(schedule.getTickCount() + set_pred_delay/1000);
-			schedule.schedule(scheduleParameters, this, "setPredecessor", pred);
+			schedule.schedule(scheduleParameters, this, "notifyPredecessor", pred);
 			
 			return new Pair<Node, CopyOnWriteArrayList<Node>>(this,this.successors);
 		} else {
@@ -356,8 +355,10 @@ public class Node implements Comparable<Node>{
 			updatedSucc.add(stabResponse.getFirst());		//add the immediate successor
 			updatedSucc.addAll(stabResponse.getSecond());	//attach its successors
 			updatedSucc.remove(updatedSucc.size()-1);		//pop the last one
-			
 			this.setSuccessors(updatedSucc);
+			
+			this.fix_fingers();
+			this.check_predecessor();
 		} else {
 			throw new RuntimeException("Error, impossible stabilization response from inactive node happened!");
 		}
@@ -374,7 +375,7 @@ public class Node implements Comparable<Node>{
 			System.out.println("Tick "+ RunEnvironment.getInstance().getCurrentSchedule().getTickCount() +", Node " +this.id.toString() + ": scheduling stabilization at "+(schedule.getTickCount() + scheduledTick));
 			ScheduleParameters scheduleParameters = ScheduleParameters
 					.createOneTime(schedule.getTickCount() + scheduledTick);
-			schedule.schedule(scheduleParameters, this, "stabilization",0);
+			schedule.schedule(scheduleParameters, this, "stabilization", 0);
 		}
 	}
 	
@@ -390,15 +391,14 @@ public class Node implements Comparable<Node>{
 				ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 				ScheduleParameters scheduleParameters = ScheduleParameters
 						.createOneTime(schedule.getTickCount() + delay_tot/1000);
-				Node nonode = null;
-				schedule.schedule(scheduleParameters, this, "setPredecessor", nonode);
+				schedule.schedule(scheduleParameters, this, "resetPredecessor");
 			}
 		}
 	}
 	
 	public void fix_fingers() {
 		if (this.next >= this.hash_size) {
-			this.next = 0;
+			this.next = 1;
 		}
 		
 		this.find_successor(this.id + (int) Math.pow(2, next-1), "finger", next);	
@@ -440,25 +440,6 @@ public class Node implements Comparable<Node>{
 	}
 	
 	/**
-	 * Performs the replacement of the predecessor and the acquisition of its data (in case it leaves the ring)
-	 * @param new_predecessor reference to the new predecessor
-	 * @param data new data
-	 */
-	public void replacePredecessorAndAcquireData(Node new_predecessor, HashMap<Integer, String> data) {
-		this.setPredecessor(new_predecessor);
-		this.newData(data);
-	}
-	
-	/**
-	 * Performs the reset of the predecessor and the acquisition of its data (in case it leaves the ring)
-	 * @param data new data
-	 */
-	public void resetPredecessorAndAcquireData(HashMap<Integer, String> data) {
-		this.setPredecessor(null);
-		this.newData(data);
-	}
-	
-	/**
 	 * Performs the replacement of the last element in the successor list (in case the successor leaves)
 	 * @param lastSuccessor the new last successor
 	 */
@@ -483,10 +464,11 @@ public class Node implements Comparable<Node>{
 			ScheduleParameters scheduleParameters = ScheduleParameters
 					.createOneTime(schedule.getTickCount() + Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay));
 			if(!(this.predecessor == null)) {
-				schedule.schedule(scheduleParameters, successor, "replacePredecessorAndAcquireData", this.predecessor, this.data);
+				schedule.schedule(scheduleParameters, successor, "setPredecessor", this.predecessor);
 			} else {
-				schedule.schedule(scheduleParameters, successor, "resetPredecessorAndAcquireData", this.data);
+				schedule.schedule(scheduleParameters, successor, "resetPredecessor");
 			}
+			schedule.schedule(scheduleParameters, successor, "newData", this.data);
 		}
 		
 		if(!(this.predecessor == null)) {
@@ -502,7 +484,7 @@ public class Node implements Comparable<Node>{
 		
 		this.finger.clearTable();
 		this.successors.clear();
-		this.setPredecessor(null);
+		this.resetPredecessor();
 		
 		this.data.clear();
 	}
@@ -556,17 +538,31 @@ public class Node implements Comparable<Node>{
 		}
 		successors+= " ]";
 		System.out.println("Successors: "+successors);
-		System.out.println("Predecessor: "+this.predecessor);
+		System.out.println("Predecessor: "+ (this.predecessor == null ? "null" : this.predecessor.getId()));
 		System.out.println("Data: "+this.data);
 	}
 
 	private void setSuccessors(CopyOnWriteArrayList<Node> successors) {
 		this.successors = successors;
 	}
+	
+	public void resetPredecessor() {
+		this.predecessor = null;
+	}
 
 	public void setPredecessor(Node predecessor) {
-		if (predecessor!=null)
-			System.out.println("Tick "+ RunEnvironment.getInstance().getCurrentSchedule().getTickCount() +", Node " +this.id.toString() + ": predecessor set "+predecessor.id.toString());
 		this.predecessor = predecessor;
+	}
+	
+	public void notifyPredecessor(Node predecessor) {
+		System.out.println("Tick "+ RunEnvironment.getInstance().getCurrentSchedule().getTickCount() +", Node " +this.id.toString() + ": predecessor set "+predecessor.id.toString());
+		if(this.predecessor == null || (Utils.belongsToInterval(predecessor.getId(), this.predecessor.getId(), this.id) && predecessor.getId() != this.id)) {
+			this.predecessor = predecessor;
+			if(this.alone) {
+				this.finger.setEntry(1, predecessor);
+				this.successors.set(0, predecessor);
+				this.alone = false;
+			}
+		}
 	}
 }

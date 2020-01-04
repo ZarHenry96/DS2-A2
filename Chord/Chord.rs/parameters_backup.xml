@@ -18,8 +18,8 @@
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
-				<parameter name="stab_amplitude" displayName="Amplitude of intervall for stabilization" type="int" 
-						defaultValue="15" 
+				<parameter name="stab_amplitude" displayName="Amplitude of interval for stabilization" type="int" 
+						defaultValue="1" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
@@ -37,7 +37,7 @@
 									
 		/>
 				<parameter name="one_at_time_init" displayName="Initalise the net one node at time" type="boolean" 
-						defaultValue="true" 
+						defaultValue="false" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"
 									
@@ -49,7 +49,7 @@
 									
 		/>
 				<parameter name="join_interval" displayName="Interval between different join" type="double" 
-						defaultValue="1.0" 
+						defaultValue="10.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
@@ -67,7 +67,7 @@
 									
 		/>
 				<parameter name="leave_interval" displayName="Interval between different leave" type="double" 
-						defaultValue="1.0" 
+						defaultValue="10.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
@@ -103,7 +103,7 @@
 									
 		/>
 				<parameter name="stab_offset" displayName="Mean number of round for stabilisation" type="double" 
-						defaultValue="30.0" 
+						defaultValue="1.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									

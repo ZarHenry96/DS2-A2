@@ -1,6 +1,7 @@
 package chord;
 
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,7 +29,8 @@ public class FingerTable {
 	}
 	
 	public void removeEntry(Node dead) {
-		for(int index: this.table.keySet()) {
+		CopyOnWriteArrayList<Integer> indices = this.getKeys(false);
+		for(int index: indices) {
 			if(this.table.get(index).equals(dead)) {
 				this.table.remove(index);
 			}

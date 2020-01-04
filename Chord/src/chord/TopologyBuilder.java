@@ -92,7 +92,6 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		this.rnd = new Random(seed);
 		this.all_nodes = new ArrayList<>();
 		for (int i = 0; i < num_nodes; i++) {
-			
 			Node node = new Node(
 					network, 
 					this.rnd, 
@@ -107,7 +106,6 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 					stab_amplitude
 			);
 			this.all_nodes.add(node);
-			
 		}
 		
 		active_nodes = new TreeSet<>();
@@ -215,7 +213,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 						find = true;
 					}
 				}
-				if(find == false) { //there are no node with an id greater than the hashKey so goes to the first node
+				if(find == false) { //there is no node with an id greater than the hashKey so go to the first node
 					this.active_nodes.first().newData(dataMap);
 				}
 			}
