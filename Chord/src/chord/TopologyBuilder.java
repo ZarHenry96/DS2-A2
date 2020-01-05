@@ -61,7 +61,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		
 		int init_num_nodes = params.getInteger("init_num_nodes");		
 		boolean one_at_time_init = params.getBoolean("one_at_time_init");
-		double insertion_delay = params.getDouble("insertion_delay");
+		double insertion_delay = params.getDouble("insertion_delay")  > stab_offset+stab_amplitude ?  params.getDouble("insertion_delay") : stab_offset+stab_amplitude+1;
 		
 		int data_size = params.getInteger("data_size");
 		int key_size = params.getInteger("key_size") > data_size ?  data_size : params.getInteger("key_size");
@@ -112,8 +112,9 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		
 		if (one_at_time_init) {
 			if (this.active_nodes.size() != init_num_nodes) {
+				
 				ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
-				ScheduleParameters scheduleParams = ScheduleParameters.createOneTime(schedule.getTickCount()+insertion_delay);
+				ScheduleParameters scheduleParams = ScheduleParameters.createOneTime(schedule.getTickCount()+1);
 				schedule.schedule(scheduleParams, this, "one_at_time_init", init_num_nodes, insertion_delay, context, space);
 			}
 		}else {
@@ -149,17 +150,24 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	 */
 	public void one_at_time_init(int init_num_nodes, double insertion_delay, Context<Object> context, ContinuousSpace<Object> space) {
 		Node node = this.all_nodes.get(this.rnd.nextInt(this.all_nodes.size()));
+		System.out.println("A");
 		if(!this.active_nodes.contains(node)) {
+			System.out.println("B");
 			this.active_nodes.add(node);
 			context.add(node);
 			space.moveTo(node, node.getX(), node.getY());
 			if (this.active_nodes.size() == 1) {
 				node.create();
+				System.out.println("C");
 			}else {
+				System.out.println("D");
 				Node succ_node = node;
 				while (succ_node.equals(node)){
 					succ_node = (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
 				}
+				System.out.println("joining "+node.getId());
+				System.out.println("joining with "+succ_node.getId());
+				System.out.println(this.active_nodes.size());
 				node.join(succ_node);
 			}
 		}
@@ -260,6 +268,9 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	 * @param space
 	 */
 	public void leaving_nodes(Context<Object> context, ContinuousSpace<Object> space, double join_interval) {
+		System.out.println("++++++++++++++++++++++++++++");
+		System.out.println(this.active_nodes.size());
+		System.out.println("++++++++++++++++++++++++++++");
 		int exiting_nodes_number = this.min_number_leaving + this.rnd.nextInt(this.leaving_amplitude);
 		exiting_nodes_number = exiting_nodes_number >= this.active_nodes.size() ? this.active_nodes.size() - 1 : exiting_nodes_number;
 		for(int i = 0; i < exiting_nodes_number; i++) {
@@ -274,7 +285,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		
 		
 		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
-		ScheduleParameters scheduleParamsJoin = ScheduleParameters.createOneTime(join_interval);
+		ScheduleParameters scheduleParamsJoin = ScheduleParameters.createOneTime(schedule.getTickCount()+join_interval);
 		schedule.schedule(scheduleParamsJoin, this, "join_new_nodes", context, space);
 		
 	}
