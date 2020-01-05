@@ -39,6 +39,7 @@ public class Node implements Comparable<Node>{
 	
 	private double stab_offset;
 	private int stab_amplitude;
+	private boolean stabphase;
 	
 	private HashMap<Integer, String> data;
 	
@@ -80,6 +81,7 @@ public class Node implements Comparable<Node>{
 		
 		this.stab_offset = stab_offset;
 		this.stab_amplitude = stab_amplitude+1;
+		this.stabphase = false;
 		
 		this.data = new HashMap<>();
 	}
@@ -295,12 +297,60 @@ public class Node implements Comparable<Node>{
 	 */
 	public void stabilization(int retryCount) {
 		if(this.subscribed && !this.crashed) {
+			boolean noMoreSucc = false;
 			Node suc = null;
 			try {
 				suc = this.successors.get(retryCount); 
-			} catch (IndexOutOfBoundsException e) { //TODO issues to investigate
-				//throw new RuntimeException("Node "+this.id+": Error! All successors are dead or disconnected, cannot stabilyze!");
-				System.err.println("Node "+this.id+": Error! All successors are dead or disconnected, cannot stabilyze! "+this.successors);
+			} catch (IndexOutOfBoundsException e) { 
+				//throw new RuntimeException("Node "+this.id+": Error! All successors are dead or disconnected, cannot stabilize!");
+				System.err.println("Node "+this.id+": Error! All successors are dead or disconnected, cannot stabilize! "+this.successors);
+				noMoreSucc = true;
+			} 
+			
+			if (!noMoreSucc && !suc.equals(this)) {
+				double delay_req = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
+				double delay_resp = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
+				double delay_tot = noMoreSucc ? this.maximum_allowed_delay : delay_req+delay_resp;
+				
+				ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
+				ScheduleParameters scheduleParameters = ScheduleParameters
+						.createOneTime(schedule.getTickCount() + delay_tot/1000);
+			
+				if (!suc.crashed && suc.subscribed) {
+					schedule.schedule(scheduleParameters, this, "stabilization_step", 0, suc);
+				} else { //in this case the value is maximum_allowed_delay for sure, so it retries on timeout
+					schedule.schedule(scheduleParameters, this, "stabilization", retryCount+1);		
+				}
+			} else {
+				this.schedule_stabilization(); //schedule next stabilization
+			}
+		}
+	}
+	
+	public void stabilization_step(int retryCount, Node answeringNode) {
+		if(this.subscribed && !this.crashed) {
+			//first time managing the step, add as first successor the predecessor of the node who answered
+			if (answeringNode!=this) {
+				Node predecessorOfSuccessor = answeringNode.predecessor; 
+				//update successors
+				while (this.successors.get(0)!=answeringNode) {
+					this.successors.remove(0);
+				}
+				if (predecessorOfSuccessor!=null && !this.successors.contains(predecessorOfSuccessor)){
+					this.successors.add(0,predecessorOfSuccessor);
+				}
+				//update finger table
+				//TODO is it correct?
+				this.finger.setEntry(1, successors.get(0));
+
+			}
+			
+			Node suc = null;
+			try {
+				suc = this.successors.get(retryCount); 
+			} catch (IndexOutOfBoundsException e) { 
+				//throw new RuntimeException("Node "+this.id+": Error! All successors are dead or disconnected, including the obtained predecessor, cannot stabilize! "+this.successors);
+				System.err.println("Node "+this.id+": Error! All successors are dead or disconnected, including the obtained predecessor, cannot stabilize! "+this.successors);
 			} 
 			
 			if (suc!=null && !suc.equals(this)) {
@@ -318,14 +368,15 @@ public class Node implements Comparable<Node>{
 					schedule.schedule(scheduleParameters, this, "processStabResponse", return_value);
 					this.schedule_stabilization(); //schedule next stabilization
 				} else { //in this case the value is maximum_allowed_delay for sure, so it retries on timeout
-					schedule.schedule(scheduleParameters, this, "stabilization", retryCount+1);		
+					System.err.println("Node "+this.id+": SUCCESSOR is DEAD");
+					schedule.schedule(scheduleParameters, this, "stabilization_step", retryCount+1, this);		
 				}
 			} else {
 				this.schedule_stabilization(); //schedule next stabilization
 			}
 		}
 	}
-	
+
 	/**
 	 * Responds to the stabilization request from another node
 	 * @return a pair type containing the node itself and its successors, or (null,null) if not sub or crashed
@@ -339,6 +390,7 @@ public class Node implements Comparable<Node>{
 			
 			return new Pair<Node, CopyOnWriteArrayList<Node>>(this,this.successors);
 		} else {
+			System.err.println("Node "+this.id+": Sorry mate, I'm DEAD");
 			return new Pair<Node, CopyOnWriteArrayList<Node>>(null,null);
 		}		
 	}
@@ -357,8 +409,14 @@ public class Node implements Comparable<Node>{
 			updatedSucc.remove(updatedSucc.size()-1);		//pop the last one
 			this.setSuccessors(updatedSucc);
 			
-			this.fix_fingers();
-			this.check_predecessor();
+			//alternate fix_fingers and check_predecessor
+			if (stabphase) {
+				this.fix_fingers();
+			} else {
+				this.check_predecessor();
+			}
+			this.stabphase = !this.stabphase;
+
 		} else {
 			throw new RuntimeException("Error, impossible stabilization response from inactive node happened!");
 		}
