@@ -37,7 +37,7 @@
 									
 		/>
 				<parameter name="one_at_time_init" displayName="Initalise the net one node at time" type="boolean" 
-						defaultValue="false" 
+						defaultValue="true" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"
 									
@@ -85,7 +85,7 @@
 									
 		/>
 				<parameter name="insertion_delay" displayName="Delay between init insertion" type="double" 
-						defaultValue="1.0" 
+						defaultValue="3.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									

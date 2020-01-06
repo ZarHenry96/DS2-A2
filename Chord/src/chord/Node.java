@@ -25,7 +25,6 @@ public class Node implements Comparable<Node>{
 	private double x;
 	private double y;
 	
-	private boolean alone;
 	private boolean subscribed;
 	private boolean crashed;
 	private double crash_pr;
@@ -35,7 +34,9 @@ public class Node implements Comparable<Node>{
 	private CopyOnWriteArrayList<Node> successors;
 	private int successors_size;
 	private Node predecessor;
+	
 	private int next;
+	private Node last_stabilized_succ;
 	
 	private double stab_offset;
 	private int stab_amplitude;
@@ -66,7 +67,6 @@ public class Node implements Comparable<Node>{
 		this.x = x;
 		this.y = y;
 		
-		this.alone = false;
 		this.subscribed = false;
 		this.crashed = false;
 		
@@ -77,7 +77,9 @@ public class Node implements Comparable<Node>{
 		this.setSuccessors(new CopyOnWriteArrayList<>());
 		this.successors_size = successors_size;
 		this.resetPredecessor();
-		this.next = 1;
+		
+		this.next = 2;
+		this.last_stabilized_succ = null;
 		
 		this.stab_offset = stab_offset;
 		this.stab_amplitude = stab_amplitude+1;
@@ -97,18 +99,57 @@ public class Node implements Comparable<Node>{
 			case "init":
 				this.finger.setEntry(position, successor);
 				this.successors.add(successor);
-				this.newData(successor.transferDataUpToKey(this.id));
 				break;
 			case "finger":
-				this.finger.setEntry(position, successor);
 				if(position == 1) {
+					this.finger.setEntry(position, successor);
 					this.successors.set(0, successor);
+				} else if (!successor.equals(this)) {
+					this.finger.setEntry(position, successor);
+					this.next++;
 				}
 				break;
 			case "successors":
-				this.successors.set(position, successor);
 				if(position == 0) {
 					this.finger.setEntry(1, successor);
+					if(this.successors.isEmpty()) {
+						this.successors.add(successor);
+					} else {
+						this.successors.set(0, successor);
+					}
+				} else if (!successor.equals(this)){
+					this.last_stabilized_succ = successor;
+					
+					if(position >= this.successors.size()) {
+						if(!this.successors.get(this.successors.size()-1).equals(successor)) {
+							this.successors.add(successor);
+						}
+					} else {
+						Node prev_element = this.successors.get(position);
+						if(!prev_element.equals(successor)) {
+							if(Utils.belongsToInterval(successor.getId(), this.successors.get(position-1).getId(), prev_element.getId())) {
+								this.successors.add(position, successor);
+								if(this.successors.size() > this.successors_size) {
+									this.successors.remove(this.successors.size()-1);
+								}
+							} else {
+								this.successors.set(position, successor);
+								
+								int i = position+1;
+								boolean done = false;
+								while(i < this.successors.size() && !done) {
+									Node current = this.successors.get(i);
+									if(Utils.belongsToInterval(current.getId(), prev_element.getId(), successor.getId())) {
+										this.successors.remove(i);
+									} else {
+										done = true;
+									}
+								}
+							}
+						}
+					}
+				} else {
+					this.last_stabilized_succ = this.successors.get(0);
 				}
 				break;
 			case "lookup":
@@ -225,7 +266,7 @@ public class Node implements Comparable<Node>{
 	 * @param target data structure: "init", "finger", "successors" or "lookup"
 	 * @param position index in the target data structure
 	 */
-	private void find_successor_step(Node target_node, Node info_source, int id, String target_dt, int position) {
+	public void find_successor_step(Node target_node, Node info_source, int id, String target_dt, int position) {
 		Pair<Node, Boolean> return_value = target_node.processSuccRequest(id);
 		
 		double delay_req = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
@@ -260,7 +301,6 @@ public class Node implements Comparable<Node>{
 		this.finger.setEntry(1, this);
 		this.successors.add(this);
 		this.subscribed = true;
-		this.alone = true;
 		
 		this.schedule_stabilization();
 	}
@@ -307,19 +347,23 @@ public class Node implements Comparable<Node>{
 				noMoreSucc = true;
 			} 
 			
-			if (!noMoreSucc && !suc.equals(this)) {
-				double delay_req = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
-				double delay_resp = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
-				double delay_tot = noMoreSucc ? this.maximum_allowed_delay : delay_req+delay_resp;
+			if (!noMoreSucc) {
+				if(suc.equals(this)) {
+					this.stabilization_step(0, this);
+				} else {
+					double delay_req = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
+					double delay_resp = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
+					double delay_tot = (suc.crashed || !suc.subscribed) ? this.maximum_allowed_delay : delay_req+delay_resp;
+					
+					ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
+					ScheduleParameters scheduleParameters = ScheduleParameters
+							.createOneTime(schedule.getTickCount() + delay_tot/1000);
 				
-				ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
-				ScheduleParameters scheduleParameters = ScheduleParameters
-						.createOneTime(schedule.getTickCount() + delay_tot/1000);
-			
-				if (!suc.crashed && suc.subscribed) {
-					schedule.schedule(scheduleParameters, this, "stabilization_step", 0, suc);
-				} else { //in this case the value is maximum_allowed_delay for sure, so it retries on timeout
-					schedule.schedule(scheduleParameters, this, "stabilization", retryCount+1);		
+					if (!suc.crashed && suc.subscribed) {
+						schedule.schedule(scheduleParameters, this, "stabilization_step", 0, suc);
+					} else { //in this case the value is maximum_allowed_delay for sure, so it retries on timeout
+						schedule.schedule(scheduleParameters, this, "stabilization", retryCount+1);		
+					}
 				}
 			} else {
 				this.schedule_stabilization(); //schedule next stabilization
@@ -329,21 +373,22 @@ public class Node implements Comparable<Node>{
 	
 	public void stabilization_step(int retryCount, Node answeringNode) {
 		if(this.subscribed && !this.crashed) {
-			//first time managing the step, add as first successor the predecessor of the node who answered
-			if (answeringNode!=this) {
-				Node predecessorOfSuccessor = answeringNode.predecessor; 
-				//update successors
-				while (this.successors.get(0)!=answeringNode) {
-					this.successors.remove(0);
-				}
-				if (predecessorOfSuccessor!=null && !this.successors.contains(predecessorOfSuccessor)){
-					this.successors.add(0,predecessorOfSuccessor);
-				}
-				//update finger table
-				//TODO is it correct?
-				this.finger.setEntry(1, successors.get(0));
-
+			//first time managing the step, add as first successor the predecessor of the node who answered		
+			Node predecessorOfSuccessor = answeringNode.getPredecessor(); 
+			//update successors
+			while (this.successors.get(0)!=answeringNode) {
+				this.successors.remove(0);
 			}
+			
+			if (predecessorOfSuccessor!=null && Utils.belongsToInterval(predecessorOfSuccessor.getId(), this.id, this.successors.get(0).getId()) && predecessorOfSuccessor.getId() != this.successors.get(0).getId()){
+				this.successors.add(0,predecessorOfSuccessor);
+				this.successors.remove(this);
+				if(this.successors.size() > this.successors_size) {
+					this.successors.remove(this.successors.size()-1);
+				}
+			}
+			//update finger table
+			this.finger.setEntry(1, successors.get(0));
 			
 			Node suc = null;
 			try {
@@ -405,16 +450,28 @@ public class Node implements Comparable<Node>{
 		if (stabResponse.getFirst() != null) {
 			CopyOnWriteArrayList<Node> updatedSucc = new CopyOnWriteArrayList<>();
 			updatedSucc.add(stabResponse.getFirst());		//add the immediate successor
-			updatedSucc.addAll(stabResponse.getSecond());	//attach its successors
-			updatedSucc.remove(updatedSucc.size()-1);		//pop the last one
+			
+			boolean done = false;
+			for(int i=0; i < stabResponse.getSecond().size() && !done; i++) { //attach its successors
+				if(!stabResponse.getSecond().get(i).equals(this) && !stabResponse.getSecond().get(i).equals(updatedSucc.get(updatedSucc.size()-1))) {
+					updatedSucc.add(stabResponse.getSecond().get(i));
+				} else {
+					done = true;
+				}
+			}
+			
+			if(updatedSucc.size() > this.successors_size) { //pop the last one
+				updatedSucc.remove(updatedSucc.size()-1);
+			}	
 			this.setSuccessors(updatedSucc);
 			
 			//alternate fix_fingers and check_predecessor
 			if (stabphase) {
 				this.fix_fingers();
 			} else {
-				this.check_predecessor();
+				this.fix_successors();
 			}
+			this.check_predecessor();
 			this.stabphase = !this.stabphase;
 
 		} else {
@@ -437,6 +494,27 @@ public class Node implements Comparable<Node>{
 		}
 	}
 	
+	public void fix_fingers() {
+		if (this.next > this.hash_size) {
+			this.next = 2;
+		}
+		
+		this.find_successor((this.id + (int) Math.pow(2, next-1)) %  ((int) Math.pow(2, this.hash_size)), "finger", next);	
+	}
+	
+	public void fix_successors() {
+		if (this.last_stabilized_succ == null || !this.successors.contains(this.last_stabilized_succ)) {
+			this.last_stabilized_succ = this.successors.get(0);
+		}
+		
+		int index = this.successors.indexOf(this.last_stabilized_succ);
+		if (index == this.successors_size-1) {
+			index = 0;
+		}
+		
+		this.find_successor(this.successors.get(index).getId()+1, "successors", index+1);
+	}
+	
 	public void check_predecessor() {
 		if (this.predecessor != null) {
 			boolean down = (this.predecessor.crashed || !this.predecessor.subscribed);
@@ -452,16 +530,6 @@ public class Node implements Comparable<Node>{
 				schedule.schedule(scheduleParameters, this, "resetPredecessor");
 			}
 		}
-	}
-	
-	public void fix_fingers() {
-		if (this.next >= this.hash_size) {
-			this.next = 1;
-		}
-		
-		this.find_successor(this.id + (int) Math.pow(2, next-1), "finger", next);	
-
-		this.next++;
 	}
 	
 	/**
@@ -586,7 +654,7 @@ public class Node implements Comparable<Node>{
 	
 	public void debug() {
 		System.out.println("\nNode id: "+this.id);
-		System.out.println("\nSubscribe: "+this.subscribed);
+		System.out.println("\nSubscribed: "+this.subscribed);
 		System.out.println("\nDown: "+this.crashed);
 		System.out.println("Tick: "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
 		System.out.println("Finger table:"+this.finger);
@@ -604,6 +672,10 @@ public class Node implements Comparable<Node>{
 		this.successors = successors;
 	}
 	
+	public Node getPredecessor() {
+		return this.predecessor;
+	}
+	
 	public void resetPredecessor() {
 		this.predecessor = null;
 	}
@@ -614,13 +686,14 @@ public class Node implements Comparable<Node>{
 	
 	public void notifyPredecessor(Node predecessor) {
 		System.out.println("Tick "+ RunEnvironment.getInstance().getCurrentSchedule().getTickCount() +", Node " +this.id.toString() + ": predecessor set "+predecessor.id.toString());
+		this.debug();
 		if(this.predecessor == null || (Utils.belongsToInterval(predecessor.getId(), this.predecessor.getId(), this.id) && predecessor.getId() != this.id)) {
 			this.predecessor = predecessor;
-			if(this.alone) {
-				this.finger.setEntry(1, predecessor);
-				this.successors.set(0, predecessor);
-				this.alone = false;
-			}
+			
+			ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
+			ScheduleParameters scheduleParameters = ScheduleParameters
+					.createOneTime(schedule.getTickCount() + Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay)/1000);
+			schedule.schedule(scheduleParameters, this.predecessor, "newData", this.transferDataUpToKey(this.predecessor.getId()));
 		}
 	}
 }
