@@ -33,7 +33,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	private int join_amplitude;
 	private int min_number_leaving;
 	private int leaving_amplitude;
-	private HashSet<Integer> keys = new HashSet<>();
+	private HashSet<Integer> keys;
 	
 	/**
 	 * Repast constructor loads the simulation parameters, init nodes and chord ring and finally schedules joins and leaves. 
@@ -107,6 +107,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 			);
 			this.all_nodes.add(node);
 		}
+		this.keys = new HashSet<>();
 		
 		active_nodes = new TreeSet<>();
 		
@@ -217,7 +218,9 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 				while(it.hasNext() && !find) {
 					Node node = (Node)it.next();
 					if (node.getId() >= hashKey) {
+						//System.out.println("OOOOOOOOOOOOOOOOOOOOOO");
 						node.newData(dataMap);
+						//node.debug();
 						find = true;
 					}
 				}
