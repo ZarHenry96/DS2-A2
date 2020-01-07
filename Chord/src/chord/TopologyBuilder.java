@@ -34,6 +34,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	private int min_number_leaving;
 	private int leaving_amplitude;
 	private HashSet<Integer> keys;
+	private ArrayList<Lookup> lookup_table;
 	
 	/**
 	 * Repast constructor loads the simulation parameters, init nodes and chord ring and finally schedules joins and leaves. 
@@ -90,6 +91,8 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		space.moveTo(ring, center, center);
 		
 		this.rnd = new Random(seed);
+		this.lookup_table = new ArrayList<>();
+		
 		this.all_nodes = new ArrayList<>();
 		for (int i = 0; i < num_nodes; i++) {
 			Node node = new Node(
@@ -103,7 +106,8 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 					recovery_interval,
 					succesors_size,
 					stab_offset,
-					stab_amplitude
+					stab_amplitude,
+					lookup_table
 			);
 			this.all_nodes.add(node);
 		}
