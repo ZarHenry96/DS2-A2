@@ -280,8 +280,6 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		
 	}
 	
-	
-	
 	public void lookup() {
 		int i = 0;
 		while(i < this.number_lookup) {

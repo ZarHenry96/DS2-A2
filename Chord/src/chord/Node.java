@@ -634,17 +634,12 @@ public class Node implements Comparable<Node>{
 	public HashMap<Integer, String> transferDataUpToKey(int target_key){
 		HashMap<Integer, String> dataToTransfer = new HashMap<>();
 		
-		CopyOnWriteArrayList<Integer> sortedKeys = new CopyOnWriteArrayList<Integer>(this.data.keySet());
-		Collections.sort(sortedKeys);
-		
-		boolean done = false;
-		for(int i=0; i < sortedKeys.size() && !done; i++) {
-			int key = sortedKeys.get(i);
-			if(key <= target_key) {
+		CopyOnWriteArrayList<Integer> keys = new CopyOnWriteArrayList<Integer>(this.data.keySet());
+		for(int i=0; i < keys.size(); i++) {
+			int key = keys.get(i);
+			if(Utils.belongsToInterval(key, this.id, target_key)) {
 				dataToTransfer.put(key, this.data.get(key));
 				this.data.remove(key);
-			} else {
-				done = true;
 			}
 		}
 		
