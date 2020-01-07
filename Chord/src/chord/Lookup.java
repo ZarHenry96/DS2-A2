@@ -27,7 +27,7 @@ public class Lookup {
 		this.path_length = path_length;
 		this.nodes_contacted = nodes_contacted;
 		if(this.path_length != -1 && this.nodes_contacted != -1 ) {
-			//this.result = new Pair<Boolean, Boolean>(nodeRes.data.containsKey(this.request_key), nodeRes.isCrashed());
+			this.result = new Pair<Boolean, Boolean>(nodeRes.getData().containsKey(this.request_key), nodeRes.isCrashed());
 		}else {
 			this.result = new Pair<Boolean, Boolean>(false, false);
 		}
@@ -35,4 +35,8 @@ public class Lookup {
 		this.final_tick = RunEnvironment.getInstance().getCurrentSchedule().getTickCount();
 		
 	}
+	
+	public boolean getResult() {
+		return this.result.getFirst();
+	};
 }

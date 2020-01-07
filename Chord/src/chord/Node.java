@@ -505,9 +505,11 @@ public class Node implements Comparable<Node>{
 					.createOneTime(schedule.getTickCount() + Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay)/1000);
 			schedule.schedule(scheduleParameters, this.predecessor, "newData", this.transferDataUpToKey(this.predecessor.getId()));
 			
-			ScheduleParameters scheduleParameters2 = ScheduleParameters
-					.createOneTime(schedule.getTickCount() + Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay)/1000);
-			schedule.schedule(scheduleParameters2, prev_predecessor, "newData", this.transferDataUpToKey(this.predecessor.getId()));
+			if(prev_predecessor != null) {
+				ScheduleParameters scheduleParameters2 = ScheduleParameters
+						.createOneTime(schedule.getTickCount() + Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay)/1000);
+				schedule.schedule(scheduleParameters2, prev_predecessor, "setNewSuccessor", this.predecessor);
+			}
 		}
 	}
 

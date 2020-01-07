@@ -108,6 +108,18 @@
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
 		/>
+				<parameter name="number_lookup" displayName="Number of lookups for batch" type="int" 
+						defaultValue="5" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+									
+		/>
+				<parameter name="lookup_interval" displayName="Interval between lookup" type="double" 
+						defaultValue="15.0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+									
+		/>
 				<parameter name="key_size" displayName="Lenght of the key (not hashed)" type="int" 
 						defaultValue="5" 
 						isReadOnly="false" 

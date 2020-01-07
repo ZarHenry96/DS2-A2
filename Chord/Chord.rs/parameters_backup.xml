@@ -67,7 +67,7 @@
 									
 		/>
 				<parameter name="leave_interval" displayName="Interval between different leave" type="double" 
-						defaultValue="10.0" 
+						defaultValue="30.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
@@ -104,6 +104,18 @@
 		/>
 				<parameter name="stab_offset" displayName="Mean number of round for stabilisation" type="double" 
 						defaultValue="1.0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+									
+		/>
+				<parameter name="number_lookup" displayName="Number of lookups for batch" type="int" 
+						defaultValue="5" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+									
+		/>
+				<parameter name="lookup_interval" displayName="Interval between lookup" type="double" 
+						defaultValue="10000.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									

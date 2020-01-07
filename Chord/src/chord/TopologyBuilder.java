@@ -152,8 +152,8 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 
 		schedule.schedule(scheduleParamsleave, this, "leaving_nodes", context, space, join_interval);
 		
-		
-		
+		ScheduleParameters scheduleParamsDebug = ScheduleParameters.createOneTime(1000);
+		schedule.schedule(scheduleParamsDebug, this, "debug");
 		
 		
 		return context;
@@ -216,7 +216,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		
 		for( Node activeNode : this.active_nodes) {
 			Node nextNode = this.active_nodes.higher(activeNode) != null ? this.active_nodes.higher(activeNode) : this.active_nodes.first();
-			//activeNode.initSuccessor(nextNode);
+			activeNode.initSuccessor(nextNode);
 		}
 		
 	}
@@ -290,7 +290,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 				int hashKey = (new ArrayList<Integer>(this.keys)).get(this.rnd.nextInt(this.keys.size()));
 				Lookup newLookup = new Lookup(this.lookup_table.size(), rndNode.getId(), hashKey, RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
 				this.lookup_table.add(newLookup);
-				//rndNode.lookup(hashKey, this.lookup_table.size()-1);
+				rndNode.lookup(hashKey, this.lookup_table.size()-1);
 				i++;
 			}
 		}
@@ -326,7 +326,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 			boolean alredyFoundValidSucc = false;
 			for(Node greaterNode: greaterNodes) {
 				if(!leaving_nodes.contains(greaterNode) && !alredyFoundValidSucc) {
-					//greaterNode.newData(node.getData());
+					greaterNode.newData(node.getData());
 					node.leave();
 					nodeIsTheGreatest = false;
 					alredyFoundValidSucc = true;
@@ -336,7 +336,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 			if(nodeIsTheGreatest) {
 				for(Node smallerNode: smallerNodes) {
 					if(!leaving_nodes.contains(smallerNode)) {
-						//smallerNode.newData(node.getData());
+						smallerNode.newData(node.getData());
 						node.leave();
 						alredyFoundValidSucc = true;
 						
@@ -360,5 +360,17 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		
 	}
 	
+	public void debug() {
+		int i = 0;
+		for(Lookup l: this.lookup_table) {
+			if(l.getResult()) {
+				i ++;
+			}else {
+				System.out.println(l);
+			}
+		}
+		
+		System.out.println("################### "+i+":"+this.lookup_table.size());
+	}
 }
 
