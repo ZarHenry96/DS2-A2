@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -35,6 +36,8 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	private int leaving_amplitude;
 	private HashSet<Integer> keys;
 	private ArrayList<Lookup> lookup_table;
+	private double lookup_interval;
+	private int number_lookup;
 	
 	/**
 	 * Repast constructor loads the simulation parameters, init nodes and chord ring and finally schedules joins and leaves. 
@@ -76,6 +79,9 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		double leave_interval = params.getDouble("leave_interval");
 		this.min_number_leaving = params.getInteger("min_number_leaving");
 		this.leaving_amplitude = params.getInteger("leaving_amplitude")+1; 
+		
+		this.lookup_interval = params.getDouble("lookup_interval");
+		this.number_lookup = params.getInteger("number_lookup");
 		
 		context.setId("Chord");
 		
@@ -133,6 +139,10 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		ScheduleParameters scheduleParamsDataGen = ScheduleParameters.createOneTime(data_gen);
 		schedule.schedule(scheduleParamsDataGen, this, "data_generation", hash_size, key_size, data_size, total_number_data);
 		
+		double first_schedule = data_gen+this.lookup_interval;
+		ScheduleParameters scheduleParamsLookup= ScheduleParameters.createRepeating(first_schedule, this.lookup_interval);
+		schedule.schedule(scheduleParamsLookup, this, "lookup");
+		
 		// the first batch of join has to be scheduled after the last node insert makes a stabilization and after the data generation, similar the first leave 
 		double first_leave = (one_at_time_init ? init_num_nodes*insertion_delay+(stab_offset+stab_amplitude)+1 : (stab_offset+stab_amplitude)) + leave_interval+1;
 		System.out.println("first leave "+first_leave + "  "+join_interval);
@@ -141,6 +151,10 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		
 
 		schedule.schedule(scheduleParamsleave, this, "leaving_nodes", context, space, join_interval);
+		
+		
+		
+		
 		
 		return context;
 	}
@@ -155,17 +169,17 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	 */
 	public void one_at_time_init(int init_num_nodes, double insertion_delay, Context<Object> context, ContinuousSpace<Object> space) {
 		Node node = this.all_nodes.get(this.rnd.nextInt(this.all_nodes.size()));
-		System.out.println("A");
+		
 		if(!this.active_nodes.contains(node)) {
-			System.out.println("B");
+			
 			this.active_nodes.add(node);
 			context.add(node);
 			space.moveTo(node, node.getX(), node.getY());
 			if (this.active_nodes.size() == 1) {
 				node.create();
-				System.out.println("C");
+				
 			}else {
-				System.out.println("D");
+				
 				Node succ_node = node;
 				while (succ_node.equals(node)){
 					succ_node = (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
@@ -202,7 +216,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		
 		for( Node activeNode : this.active_nodes) {
 			Node nextNode = this.active_nodes.higher(activeNode) != null ? this.active_nodes.higher(activeNode) : this.active_nodes.first();
-			activeNode.setSuccessor(nextNode);
+			//activeNode.initSuccessor(nextNode);
 		}
 		
 	}
@@ -266,6 +280,23 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		
 	}
 	
+	
+	
+	public void lookup() {
+		int i = 0;
+		while(i < this.number_lookup) {
+			Node rndNode =  (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
+			if(!rndNode.isCrashed()) {
+				int hashKey = (new ArrayList<Integer>(this.keys)).get(this.rnd.nextInt(this.keys.size()));
+				Lookup newLookup = new Lookup(this.lookup_table.size(), rndNode.getId(), hashKey, RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
+				this.lookup_table.add(newLookup);
+				//rndNode.lookup(hashKey, this.lookup_table.size()-1);
+				i++;
+			}
+		}
+		
+	}
+	
 	/**
 	 * This method is in charge to remove a variable number of nodes  (between min_number_leave and this.min_number_leave + leave_amplitude) in the chord ring periodically, 
 	 * at least one node is left in the chord ring. 
@@ -279,13 +310,43 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		System.out.println(this.active_nodes.size());
 		int exiting_nodes_number = this.min_number_leaving + this.rnd.nextInt(this.leaving_amplitude);
 		exiting_nodes_number = exiting_nodes_number >= this.active_nodes.size() ? this.active_nodes.size() - 1 : exiting_nodes_number;
-		for(int i = 0; i < exiting_nodes_number; i++) {
+		HashSet<Node> leaving_nodes = new HashSet<>();
+		while(leaving_nodes.size() != exiting_nodes_number) {
 			Node rndNode =  (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
-			rndNode.leave();
-			System.out.println("Leaving!!! "+rndNode.getId()+"  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount() );
-			context.remove(rndNode);
+			if(!leaving_nodes.contains(rndNode) && !rndNode.isCrashed()) {
+				leaving_nodes.add(rndNode);
+			}
+		}
+		
+		for(Node node: leaving_nodes ) {
+			SortedSet<Node> greaterNodes = this.active_nodes.tailSet(node);
+			SortedSet<Node> smallerNodes = this.active_nodes.headSet(node);
 			
-			this.active_nodes.remove(rndNode);
+			boolean nodeIsTheGreatest = true;
+			boolean alredyFoundValidSucc = false;
+			for(Node greaterNode: greaterNodes) {
+				if(!leaving_nodes.contains(greaterNode) && !alredyFoundValidSucc) {
+					//greaterNode.newData(node.getData());
+					node.leave();
+					nodeIsTheGreatest = false;
+					alredyFoundValidSucc = true;
+					
+				}
+			}
+			if(nodeIsTheGreatest) {
+				for(Node smallerNode: smallerNodes) {
+					if(!leaving_nodes.contains(smallerNode)) {
+						//smallerNode.newData(node.getData());
+						node.leave();
+						alredyFoundValidSucc = true;
+						
+					}
+				}
+			}
+			System.out.println("Leaving!!! "+node.getId()+"  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount() );
+			context.remove(node);
+			this.active_nodes.remove(node);
+			
 		}
 		
 		System.out.println(this.active_nodes.size());
