@@ -85,7 +85,7 @@
 									
 		/>
 				<parameter name="insertion_delay" displayName="Delay between init insertion" type="double" 
-						defaultValue="3.0" 
+						defaultValue="5.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									

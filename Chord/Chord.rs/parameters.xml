@@ -67,7 +67,7 @@
 									
 		/>
 				<parameter name="leave_interval" displayName="Interval between different leave" type="double" 
-						defaultValue="10.0" 
+						defaultValue="30.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									

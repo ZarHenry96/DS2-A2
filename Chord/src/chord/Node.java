@@ -198,6 +198,8 @@ public class Node implements Comparable<Node>{
 	public Pair<Node, Boolean> processSuccRequest(int id) {
 		Pair<Node, Boolean> pair = null;
 		if(this.subscribed && !this.crashed) {
+
+			System.err.println("step <- "+this.id+ "  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
 			if(Utils.belongsToInterval(id, this.id, this.successors.get(0).getId())) {
 				pair = new Pair<Node, Boolean>(this.successors.get(0), true);
 			} else {
@@ -267,12 +269,13 @@ public class Node implements Comparable<Node>{
 	 * @param position index in the target data structure
 	 */
 	public void find_successor_step(Node target_node, Node info_source, int id, String target_dt, int position) {
+
+		System.err.println("step -> "+this.id+ "  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
 		Pair<Node, Boolean> return_value = target_node.processSuccRequest(id);
 		
 		double delay_req = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
 		double delay_resp = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
 		double delay_tot = return_value.getFirst() == null ? this.maximum_allowed_delay : delay_req+delay_resp;
-		
 		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 		ScheduleParameters scheduleParameters = ScheduleParameters
 				.createOneTime(schedule.getTickCount() + delay_tot/1000);
@@ -376,6 +379,7 @@ public class Node implements Comparable<Node>{
 			//first time managing the step, add as first successor the predecessor of the node who answered		
 			Node predecessorOfSuccessor = answeringNode.getPredecessor(); 
 			//update successors
+			System.err.println("stab "+this.id+ "  "+answeringNode.getId()+"  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
 			while (this.successors.get(0)!=answeringNode) {
 				this.successors.remove(0);
 			}
@@ -598,9 +602,7 @@ public class Node implements Comparable<Node>{
 		}
 		
 		if(!(this.predecessor == null)) {
-			System.out.println("+++++++++++");
 			this.debug();
-			System.out.println("+++++++++++");
 			ScheduleParameters scheduleParameters = ScheduleParameters
 					.createOneTime(schedule.getTickCount() + Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay));
 			schedule.schedule(scheduleParameters, this.predecessor, "setLastSuccessor", this.successors.get(this.successors.size()-1));		

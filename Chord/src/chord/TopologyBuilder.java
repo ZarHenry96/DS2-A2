@@ -130,7 +130,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		
 		// the first batch of join has to be scheduled after the last node insert makes a stabilization and after the data generation, similar the first leave 
 		double first_leave = (one_at_time_init ? init_num_nodes*insertion_delay+(stab_offset+stab_amplitude)+1 : (stab_offset+stab_amplitude)) + leave_interval+1;
-		System.out.println("first leave "+first_leave);
+		System.out.println("first leave "+first_leave + "  "+join_interval);
 
 		ScheduleParameters scheduleParamsleave = ScheduleParameters.createRepeating(first_leave, leave_interval);
 		
@@ -241,17 +241,17 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		HashSet<Integer> new_join_ids = new HashSet<>();
 		while (this.active_nodes.size() != final_nodes_number ){
 			Node rndNode =  (new ArrayList<Node>(this.all_nodes)).get(this.rnd.nextInt(this.all_nodes.size()));
-			if (!this.active_nodes.contains(rndNode) ) {
+			if (!this.active_nodes.contains(rndNode) && !new_join_ids.contains(rndNode.getId()) ) {
 				this.active_nodes.add(rndNode);
 				new_join_ids.add(rndNode.getId());
 				context.add(rndNode);
 				space.moveTo(rndNode, rndNode.getX(), rndNode.getY());
 				Node succ_node = rndNode;
-				while (succ_node.equals(rndNode) && new_join_ids.contains(rndNode.getId())){
+				while (succ_node.equals(rndNode) || new_join_ids.contains(succ_node.getId())){
 					succ_node = (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
 				}
 
-				System.out.println("joining "+rndNode.getId());
+				System.out.println("joining "+rndNode.getId()+ "  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
 				System.out.println("joining with "+succ_node.getId());
 				rndNode.join(succ_node);
 			}
@@ -270,22 +270,24 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	public void leaving_nodes(Context<Object> context, ContinuousSpace<Object> space, double join_interval) {
 		System.out.println("++++++++++++++++++++++++++++");
 		System.out.println(this.active_nodes.size());
-		System.out.println("++++++++++++++++++++++++++++");
 		int exiting_nodes_number = this.min_number_leaving + this.rnd.nextInt(this.leaving_amplitude);
 		exiting_nodes_number = exiting_nodes_number >= this.active_nodes.size() ? this.active_nodes.size() - 1 : exiting_nodes_number;
 		for(int i = 0; i < exiting_nodes_number; i++) {
 			Node rndNode =  (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
 			rndNode.leave();
-			System.out.println("Leaving!!! "+rndNode.getId());
+			System.out.println("Leaving!!! "+rndNode.getId()+"  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount() );
 			context.remove(rndNode);
-			System.out.println(this.active_nodes.size());
+			
 			this.active_nodes.remove(rndNode);
-			System.out.println(this.active_nodes.size());
 		}
 		
-		
+		System.out.println(this.active_nodes.size());
+		System.out.println("++++++++++++++++++++++++++++   ");
+		 
 		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
-		ScheduleParameters scheduleParamsJoin = ScheduleParameters.createOneTime(schedule.getTickCount()+join_interval);
+		double time = schedule.getTickCount()+join_interval;
+		System.out.println(schedule.getTickCount()+" join scheduled at "+ time);
+		ScheduleParameters scheduleParamsJoin = ScheduleParameters.createOneTime(time);
 		schedule.schedule(scheduleParamsJoin, this, "join_new_nodes", context, space);
 		
 	}
