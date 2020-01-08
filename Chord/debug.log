@@ -1,5 +1,5 @@
-FATAL [Thread-2] 2020-01-06 21:02:08,991 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (74.0)
+FATAL [Thread-2] 2020-01-07 21:41:53,151 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (446.0009085718062)
 java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
 	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
 	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
@@ -9,151 +9,18 @@ java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
 	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
 	at java.base/java.lang.Thread.run(Thread.java:834)
 Caused by: java.lang.reflect.InvocationTargetException
-	at chord.TopologyBuilder$$FastClassByCGLIB$$c217647a.invoke(<generated>)
+	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
 	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
 	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
 	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:201)
-	at chord.Node.find_successor_step(Node.java:270)
-	at chord.Node.join(Node.java:314)
-	at chord.TopologyBuilder.join_new_nodes(TopologyBuilder.java:256)
+Caused by: java.lang.IllegalArgumentException: Unable to find match for ScheduleMethod annotated object 'java.lang.String' with method parameters (repast.simphony.util.collections.Pair, chord.Node, java.util.ArrayList, java.lang.Integer, java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.Integer)
+	at repast.simphony.engine.schedule.DefaultActionFactory.createAction(DefaultActionFactory.java:102)
+	at repast.simphony.engine.schedule.DefaultSchedulableActionFactory.createAction(DefaultSchedulableActionFactory.java:144)
+	at repast.simphony.engine.schedule.Schedule.schedule(Schedule.java:254)
+	at chord.Node.processSuccResponse(Node.java:271)
 	... 9 more
-FATAL [Thread-2] 2020-01-06 21:29:12,458 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (74.0)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.TopologyBuilder$$FastClassByCGLIB$$c217647a.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:201)
-	at chord.Node.find_successor_step(Node.java:270)
-	at chord.Node.join(Node.java:314)
-	at chord.TopologyBuilder.join_new_nodes(TopologyBuilder.java:256)
-	... 9 more
-FATAL [Thread-2] 2020-01-06 21:31:05,165 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (74.0)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.TopologyBuilder$$FastClassByCGLIB$$c217647a.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:201)
-	at chord.Node.find_successor_step(Node.java:270)
-	at chord.Node.join(Node.java:314)
-	at chord.TopologyBuilder.join_new_nodes(TopologyBuilder.java:256)
-	... 9 more
-FATAL [Thread-3] 2020-01-06 21:31:41,201 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (64.0)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.TopologyBuilder$$FastClassByCGLIB$$c217647a.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:201)
-	at chord.Node.find_successor_step(Node.java:270)
-	at chord.Node.join(Node.java:314)
-	at chord.TopologyBuilder.join_new_nodes(TopologyBuilder.java:256)
-	... 9 more
-FATAL [Thread-6] 2020-01-06 21:33:51,789 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (94.0)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.TopologyBuilder$$FastClassByCGLIB$$c217647a.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException
-FATAL [Thread-2] 2020-01-06 21:35:54,902 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (74.0)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.TopologyBuilder$$FastClassByCGLIB$$c217647a.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:201)
-	at chord.Node.find_successor_step(Node.java:270)
-	at chord.Node.join(Node.java:314)
-	at chord.TopologyBuilder.join_new_nodes(TopologyBuilder.java:256)
-	... 9 more
-FATAL [Thread-2] 2020-01-06 21:37:52,633 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (74.0)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.TopologyBuilder$$FastClassByCGLIB$$c217647a.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:202)
-	at chord.Node.find_successor_step(Node.java:271)
-	at chord.Node.join(Node.java:315)
-	at chord.TopologyBuilder.join_new_nodes(TopologyBuilder.java:256)
-	... 9 more
-FATAL [Thread-2] 2020-01-06 22:07:01,729 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (114.50280112695904)
+FATAL [Thread-4] 2020-01-08 09:53:34,517 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (596.018299242186)
 java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
 	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
 	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
@@ -170,10 +37,11 @@ Caused by: java.lang.reflect.InvocationTargetException
 Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
 	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
 	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.stabilization_step(Node.java:380)
+	at chord.Node.processSuccRequest(Node.java:215)
+	at chord.Node.find_successor_step(Node.java:195)
 	... 9 more
-FATAL [Thread-4] 2020-01-06 22:22:25,624 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (114.50280112695904)
+FATAL [Thread-2] 2020-01-08 10:12:49,959 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (603.0001196610358)
 java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
 	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
 	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
@@ -190,10 +58,12 @@ Caused by: java.lang.reflect.InvocationTargetException
 Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
 	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
 	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.stabilization_step(Node.java:380)
+	at chord.Node.processSuccRequest(Node.java:220)
+	at chord.Node.find_successor_step(Node.java:195)
+	at chord.Node.processSuccResponse(Node.java:292)
 	... 9 more
-FATAL [Thread-5] 2020-01-06 22:24:58,768 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (114.50280112695904)
+FATAL [Thread-2] 2020-01-08 10:28:07,742 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (595.0)
 java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
 	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
 	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
@@ -207,13 +77,16 @@ Caused by: java.lang.reflect.InvocationTargetException
 	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
 	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
 	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.stabilization_step(Node.java:380)
+Caused by: java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0
+	at java.base/jdk.internal.util.Preconditions.outOfBounds(Preconditions.java:64)
+	at java.base/jdk.internal.util.Preconditions.outOfBoundsCheckIndex(Preconditions.java:70)
+	at java.base/jdk.internal.util.Preconditions.checkIndex(Preconditions.java:248)
+	at java.base/java.util.Objects.checkIndex(Objects.java:372)
+	at java.base/java.util.ArrayList.get(ArrayList.java:458)
+	at chord.Node.stabilization(Node.java:405)
 	... 9 more
-FATAL [Thread-2] 2020-01-06 22:26:14,659 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (114.50280112695904)
+FATAL [Thread-2] 2020-01-08 10:33:08,558 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (104.0)
 java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
 	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
 	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
@@ -227,580 +100,16 @@ Caused by: java.lang.reflect.InvocationTargetException
 	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
 	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
 	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.stabilization_step(Node.java:381)
+Caused by: java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0
+	at java.base/jdk.internal.util.Preconditions.outOfBounds(Preconditions.java:64)
+	at java.base/jdk.internal.util.Preconditions.outOfBoundsCheckIndex(Preconditions.java:70)
+	at java.base/jdk.internal.util.Preconditions.checkIndex(Preconditions.java:248)
+	at java.base/java.util.Objects.checkIndex(Objects.java:372)
+	at java.base/java.util.ArrayList.get(ArrayList.java:458)
+	at chord.Node.stabilization(Node.java:405)
 	... 9 more
-FATAL [Thread-2] 2020-01-06 22:30:43,811 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (107.50094001784954)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:202)
-	at chord.Node.find_successor_step(Node.java:271)
-	at chord.Node.find_successor(Node.java:293)
-	at chord.Node.fix_fingers(Node.java:504)
-	at chord.Node.processStabResponse(Node.java:472)
-	... 9 more
-FATAL [Thread-2] 2020-01-06 22:32:38,677 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (107.50094001784954)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:202)
-	at chord.Node.find_successor_step(Node.java:271)
-	at chord.Node.find_successor(Node.java:293)
-	at chord.Node.fix_fingers(Node.java:504)
-	at chord.Node.processStabResponse(Node.java:472)
-	... 9 more
-FATAL [Thread-2] 2020-01-06 22:33:46,795 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (107.50094001784954)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:202)
-	at chord.Node.find_successor_step(Node.java:271)
-	at chord.Node.find_successor(Node.java:293)
-	at chord.Node.fix_fingers(Node.java:504)
-	at chord.Node.processStabResponse(Node.java:472)
-	... 9 more
-FATAL [Thread-2] 2020-01-06 22:35:38,717 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (107.50094001784954)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:202)
-	at chord.Node.find_successor_step(Node.java:271)
-	at chord.Node.find_successor(Node.java:293)
-	at chord.Node.fix_fingers(Node.java:504)
-	at chord.Node.processStabResponse(Node.java:472)
-	... 9 more
-FATAL [Thread-2] 2020-01-06 22:36:38,991 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (107.50094001784954)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:203)
-	at chord.Node.find_successor_step(Node.java:274)
-	at chord.Node.find_successor(Node.java:295)
-	at chord.Node.fix_fingers(Node.java:506)
-	at chord.Node.processStabResponse(Node.java:474)
-	... 9 more
-FATAL [Thread-2] 2020-01-06 22:42:27,410 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (107.50094001784954)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:203)
-	at chord.Node.find_successor_step(Node.java:274)
-	at chord.Node.find_successor(Node.java:295)
-	at chord.Node.fix_fingers(Node.java:506)
-	at chord.Node.processStabResponse(Node.java:474)
-	... 9 more
-FATAL [Thread-2] 2020-01-06 22:44:43,251 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (107.50094001784954)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:203)
-	at chord.Node.find_successor_step(Node.java:274)
-	at chord.Node.find_successor(Node.java:295)
-	at chord.Node.fix_fingers(Node.java:506)
-	at chord.Node.processStabResponse(Node.java:474)
-	... 9 more
-FATAL [Thread-2] 2020-01-06 22:54:13,265 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (107.50094001784954)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:203)
-	at chord.Node.find_successor_step(Node.java:274)
-	at chord.Node.find_successor(Node.java:295)
-	at chord.Node.fix_fingers(Node.java:506)
-	at chord.Node.processStabResponse(Node.java:474)
-	... 9 more
-FATAL [Thread-2] 2020-01-06 22:56:37,641 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (107.50094001784954)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:203)
-	at chord.Node.find_successor_step(Node.java:274)
-	at chord.Node.find_successor(Node.java:295)
-	at chord.Node.fix_fingers(Node.java:506)
-	at chord.Node.processStabResponse(Node.java:474)
-	... 9 more
-FATAL [Thread-2] 2020-01-06 22:57:48,556 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (107.50094001784954)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:203)
-	at chord.Node.find_successor_step(Node.java:274)
-	at chord.Node.find_successor(Node.java:295)
-	at chord.Node.fix_fingers(Node.java:506)
-	at chord.Node.processStabResponse(Node.java:474)
-	... 9 more
-FATAL [Thread-3] 2020-01-06 23:03:32,317 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (145.00069889288787)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.stabilization_step(Node.java:383)
-	... 9 more
-FATAL [Thread-4] 2020-01-06 23:04:07,340 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (145.00069889288787)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.stabilization_step(Node.java:383)
-	... 9 more
-FATAL [Thread-2] 2020-01-06 23:09:37,463 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (145.00069889288787)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.stabilization_step(Node.java:383)
-	... 9 more
-FATAL [Thread-2] 2020-01-06 23:19:43,523 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (145.00069889288787)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.stabilization_step(Node.java:383)
-	... 9 more
-FATAL [Thread-2] 2020-01-07 14:20:26,141 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (555.0002839406167)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:206)
-	at chord.Node.find_successor_step(Node.java:185)
-	at chord.Node.find_successor(Node.java:170)
-	at chord.Node.fix_successors(Node.java:563)
-	at chord.Node.fix_data_structures(Node.java:533)
-	at chord.Node.processStabResponse(Node.java:519)
-	... 9 more
-FATAL [Thread-2] 2020-01-07 14:30:05,390 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (764.5009600495138)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:206)
-	at chord.Node.find_successor_step(Node.java:185)
-	at chord.Node.find_successor(Node.java:170)
-	at chord.Node.fix_successors(Node.java:564)
-	at chord.Node.fix_data_structures(Node.java:534)
-	at chord.Node.processStabResponse(Node.java:520)
-	... 9 more
-FATAL [Thread-3] 2020-01-07 14:36:10,228 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (555.0023500721534)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:206)
-	at chord.Node.find_successor_step(Node.java:185)
-	at chord.Node.find_successor(Node.java:170)
-	at chord.Node.fix_successors(Node.java:564)
-	at chord.Node.fix_data_structures(Node.java:534)
-	at chord.Node.processStabResponse(Node.java:520)
-	... 9 more
-FATAL [Thread-2] 2020-01-07 14:49:16,105 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (674.5038195366171)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:206)
-	at chord.Node.find_successor_step(Node.java:185)
-	at chord.Node.find_successor(Node.java:170)
-	at chord.Node.fix_fingers(Node.java:552)
-	at chord.Node.fix_data_structures(Node.java:536)
-	at chord.Node.processStabResponse(Node.java:524)
-	... 9 more
-FATAL [Thread-2] 2020-01-07 15:01:56,522 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (555.0023500721534)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:206)
-	at chord.Node.find_successor_step(Node.java:185)
-	at chord.Node.find_successor(Node.java:170)
-	at chord.Node.fix_successors(Node.java:571)
-	at chord.Node.fix_data_structures(Node.java:541)
-	at chord.Node.processStabResponse(Node.java:527)
-	... 9 more
-FATAL [Thread-2] 2020-01-07 15:06:35,311 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (555.0023500721534)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:206)
-	at chord.Node.find_successor_step(Node.java:185)
-	at chord.Node.find_successor(Node.java:170)
-	at chord.Node.fix_successors(Node.java:572)
-	at chord.Node.fix_data_structures(Node.java:542)
-	at chord.Node.processStabResponse(Node.java:528)
-	... 9 more
-FATAL [Thread-2] 2020-01-07 15:11:48,770 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (584.5028329666255)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.RuntimeException: Aooooo
-	at chord.Node.stabilization(Node.java:369)
-	... 9 more
-FATAL [Thread-2] 2020-01-07 15:14:21,248 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (585.502928252962)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.RuntimeException: Aooooo
-	at chord.Node.stabilization(Node.java:370)
-	... 9 more
-FATAL [Thread-3] 2020-01-07 15:23:53,347 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (584.5028329666255)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.RuntimeException: Aooooo
-	at chord.Node.stabilization(Node.java:370)
-	... 9 more
-FATAL [Thread-2] 2020-01-07 15:28:00,772 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (615.000535643714)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.elementAt(CopyOnWriteArrayList.java:386)
-	at java.base/java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:399)
-	at chord.Node.processSuccRequest(Node.java:211)
-	at chord.Node.find_successor_step(Node.java:185)
-	at chord.Node.find_successor(Node.java:170)
-	at chord.Node.fix_successors(Node.java:578)
-	at chord.Node.fix_data_structures(Node.java:548)
-	at chord.Node.processStabResponse(Node.java:534)
-	... 9 more
-FATAL [Thread-2] 2020-01-07 15:33:46,999 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (55.0011289151132)
-java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
-	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
-	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
-	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
-	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
-	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
-	at java.base/java.lang.Thread.run(Thread.java:834)
-Caused by: java.lang.reflect.InvocationTargetException
-	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
-	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
-	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
-	... 6 more
-Caused by: java.lang.RuntimeException: Aooooo
-	at chord.Node.stabilization(Node.java:370)
-	... 9 more
-FATAL [Thread-2] 2020-01-07 19:22:25,136 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
-Current tick (7.00003575633062)
+FATAL [Thread-2] 2020-01-08 14:35:05,036 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (185.00081987903195)
 java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
 	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
 	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
@@ -815,10 +124,348 @@ Caused by: java.lang.reflect.InvocationTargetException
 	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
 	... 6 more
 Caused by: java.lang.NullPointerException
-	at repast.simphony.engine.schedule.CallBackAction.initMethod(CallBackAction.java:84)
-	at repast.simphony.engine.schedule.CallBackAction.<init>(CallBackAction.java:79)
-	at repast.simphony.engine.schedule.DefaultActionFactory.createAction(DefaultActionFactory.java:45)
-	at repast.simphony.engine.schedule.DefaultSchedulableActionFactory.createAction(DefaultSchedulableActionFactory.java:81)
-	at repast.simphony.engine.schedule.Schedule.schedule(Schedule.java:191)
-	at chord.Node.notifiedPredecessor(Node.java:510)
+	at chord.Node.processSuccResponse(Node.java:304)
+	... 9 more
+FATAL [Thread-3] 2020-01-08 16:34:51,625 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (661.5000951235561)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+Caused by: java.lang.reflect.InvocationTargetException
+	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
+	... 6 more
+Caused by: java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0
+	at java.base/jdk.internal.util.Preconditions.outOfBounds(Preconditions.java:64)
+	at java.base/jdk.internal.util.Preconditions.outOfBoundsCheckIndex(Preconditions.java:70)
+	at java.base/jdk.internal.util.Preconditions.checkIndex(Preconditions.java:248)
+	at java.base/java.util.Objects.checkIndex(Objects.java:372)
+	at java.base/java.util.ArrayList.get(ArrayList.java:458)
+	at chord.Node.processSuccRequest(Node.java:228)
+	at chord.Node.find_successor_step(Node.java:202)
+	... 9 more
+FATAL [Thread-2] 2020-01-08 16:37:47,789 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (385.0)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+Caused by: java.lang.reflect.InvocationTargetException
+	at chord.TopologyBuilder$$FastClassByCGLIB$$c217647a.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
+	... 6 more
+Caused by: java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0
+	at java.base/jdk.internal.util.Preconditions.outOfBounds(Preconditions.java:64)
+	at java.base/jdk.internal.util.Preconditions.outOfBoundsCheckIndex(Preconditions.java:70)
+	at java.base/jdk.internal.util.Preconditions.checkIndex(Preconditions.java:248)
+	at java.base/java.util.Objects.checkIndex(Objects.java:372)
+	at java.base/java.util.ArrayList.get(ArrayList.java:458)
+	at chord.Node.find_successor(Node.java:180)
+	at chord.Node.lookup(Node.java:837)
+	at chord.TopologyBuilder.lookup(TopologyBuilder.java:291)
+	... 9 more
+FATAL [Thread-2] 2020-01-08 16:40:46,086 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (451.0000244554553)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+Caused by: java.lang.reflect.InvocationTargetException
+	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
+	... 6 more
+Caused by: java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0
+	at java.base/jdk.internal.util.Preconditions.outOfBounds(Preconditions.java:64)
+	at java.base/jdk.internal.util.Preconditions.outOfBoundsCheckIndex(Preconditions.java:70)
+	at java.base/jdk.internal.util.Preconditions.checkIndex(Preconditions.java:248)
+	at java.base/java.util.Objects.checkIndex(Objects.java:372)
+	at java.base/java.util.ArrayList.get(ArrayList.java:458)
+	at chord.Node.processSuccRequest(Node.java:230)
+	at chord.Node.find_successor_step(Node.java:204)
+	at chord.Node.processSuccResponse(Node.java:322)
+	... 9 more
+FATAL [Thread-2] 2020-01-08 17:10:27,556 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (541.0000319290615)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+Caused by: java.lang.reflect.InvocationTargetException
+	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
+	... 6 more
+Caused by: java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0
+	at java.base/jdk.internal.util.Preconditions.outOfBounds(Preconditions.java:64)
+	at java.base/jdk.internal.util.Preconditions.outOfBoundsCheckIndex(Preconditions.java:70)
+	at java.base/jdk.internal.util.Preconditions.checkIndex(Preconditions.java:248)
+	at java.base/java.util.Objects.checkIndex(Objects.java:372)
+	at java.base/java.util.ArrayList.get(ArrayList.java:458)
+	at chord.Node.processSuccRequest(Node.java:230)
+	at chord.Node.find_successor_step(Node.java:205)
+	at chord.Node.processSuccResponse(Node.java:322)
+	... 9 more
+FATAL [Thread-2] 2020-01-08 17:18:51,912 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (451.0000299762303)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+Caused by: java.lang.reflect.InvocationTargetException
+	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
+	... 6 more
+Caused by: java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0
+	at java.base/jdk.internal.util.Preconditions.outOfBounds(Preconditions.java:64)
+	at java.base/jdk.internal.util.Preconditions.outOfBoundsCheckIndex(Preconditions.java:70)
+	at java.base/jdk.internal.util.Preconditions.checkIndex(Preconditions.java:248)
+	at java.base/java.util.Objects.checkIndex(Objects.java:372)
+	at java.base/java.util.ArrayList.get(ArrayList.java:458)
+	at chord.Node.processSuccRequest(Node.java:231)
+	at chord.Node.find_successor_step(Node.java:206)
+	at chord.Node.processSuccResponse(Node.java:323)
+	... 9 more
+FATAL [Thread-2] 2020-01-08 17:23:25,050 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (421.00001813729796)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+Caused by: java.lang.reflect.InvocationTargetException
+	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
+	... 6 more
+Caused by: java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0
+	at java.base/jdk.internal.util.Preconditions.outOfBounds(Preconditions.java:64)
+	at java.base/jdk.internal.util.Preconditions.outOfBoundsCheckIndex(Preconditions.java:70)
+	at java.base/jdk.internal.util.Preconditions.checkIndex(Preconditions.java:248)
+	at java.base/java.util.Objects.checkIndex(Objects.java:372)
+	at java.base/java.util.ArrayList.get(ArrayList.java:458)
+	at chord.Node.processSuccRequest(Node.java:231)
+	at chord.Node.find_successor_step(Node.java:206)
+	at chord.Node.processSuccResponse(Node.java:323)
+	... 9 more
+FATAL [Thread-2] 2020-01-08 17:35:10,896 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (421.00004122462616)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+Caused by: java.lang.reflect.InvocationTargetException
+	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
+	... 6 more
+Caused by: java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0
+	at java.base/jdk.internal.util.Preconditions.outOfBounds(Preconditions.java:64)
+	at java.base/jdk.internal.util.Preconditions.outOfBoundsCheckIndex(Preconditions.java:70)
+	at java.base/jdk.internal.util.Preconditions.checkIndex(Preconditions.java:248)
+	at java.base/java.util.Objects.checkIndex(Objects.java:372)
+	at java.base/java.util.ArrayList.get(ArrayList.java:458)
+	at chord.Node.processSuccRequest(Node.java:233)
+	at chord.Node.find_successor_step(Node.java:208)
+	at chord.Node.processSuccResponse(Node.java:325)
+	... 9 more
+FATAL [Thread-2] 2020-01-08 17:41:43,376 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (476.00011292334307)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+Caused by: java.lang.reflect.InvocationTargetException
+	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
+	... 6 more
+Caused by: java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0
+	at java.base/jdk.internal.util.Preconditions.outOfBounds(Preconditions.java:64)
+	at java.base/jdk.internal.util.Preconditions.outOfBoundsCheckIndex(Preconditions.java:70)
+	at java.base/jdk.internal.util.Preconditions.checkIndex(Preconditions.java:248)
+	at java.base/java.util.Objects.checkIndex(Objects.java:372)
+	at java.base/java.util.ArrayList.get(ArrayList.java:458)
+	at chord.Node.processSuccRequest(Node.java:233)
+	at chord.Node.find_successor_step(Node.java:208)
+	... 9 more
+FATAL [Thread-2] 2020-01-08 18:29:28,044 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (391.0)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+Caused by: java.lang.reflect.InvocationTargetException
+	at chord.TopologyBuilder$$FastClassByCGLIB$$c217647a.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
+	... 6 more
+Caused by: java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0
+	at java.base/jdk.internal.util.Preconditions.outOfBounds(Preconditions.java:64)
+	at java.base/jdk.internal.util.Preconditions.outOfBoundsCheckIndex(Preconditions.java:70)
+	at java.base/jdk.internal.util.Preconditions.checkIndex(Preconditions.java:248)
+	at java.base/java.util.Objects.checkIndex(Objects.java:372)
+	at java.base/java.util.ArrayList.get(ArrayList.java:458)
+	at chord.Node.processSuccRequest(Node.java:233)
+	at chord.Node.find_successor_step(Node.java:208)
+	at chord.Node.join(Node.java:117)
+	at chord.TopologyBuilder.join_new_nodes(TopologyBuilder.java:277)
+	... 9 more
+FATAL [Thread-2] 2020-01-08 18:38:19,375 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (445.0)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+Caused by: java.lang.reflect.InvocationTargetException
+	at chord.TopologyBuilder$$FastClassByCGLIB$$c217647a.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
+	... 6 more
+Caused by: java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0
+	at java.base/jdk.internal.util.Preconditions.outOfBounds(Preconditions.java:64)
+	at java.base/jdk.internal.util.Preconditions.outOfBoundsCheckIndex(Preconditions.java:70)
+	at java.base/jdk.internal.util.Preconditions.checkIndex(Preconditions.java:248)
+	at java.base/java.util.Objects.checkIndex(Objects.java:372)
+	at java.base/java.util.ArrayList.get(ArrayList.java:458)
+	at chord.Node.find_successor(Node.java:184)
+	at chord.Node.lookup(Node.java:850)
+	at chord.TopologyBuilder.lookup(TopologyBuilder.java:291)
+	... 9 more
+FATAL [Thread-2] 2020-01-08 18:42:02,678 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (460.0)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+Caused by: java.lang.reflect.InvocationTargetException
+	at chord.TopologyBuilder$$FastClassByCGLIB$$c217647a.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
+	... 6 more
+Caused by: java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0
+	at java.base/jdk.internal.util.Preconditions.outOfBounds(Preconditions.java:64)
+	at java.base/jdk.internal.util.Preconditions.outOfBoundsCheckIndex(Preconditions.java:70)
+	at java.base/jdk.internal.util.Preconditions.checkIndex(Preconditions.java:248)
+	at java.base/java.util.Objects.checkIndex(Objects.java:372)
+	at java.base/java.util.ArrayList.get(ArrayList.java:458)
+	at chord.Node.find_successor(Node.java:184)
+	at chord.Node.lookup(Node.java:850)
+	at chord.TopologyBuilder.lookup(TopologyBuilder.java:291)
+	... 9 more
+FATAL [Thread-2] 2020-01-08 18:47:38,502 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (1000.0)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+Caused by: java.lang.reflect.InvocationTargetException
+	at chord.TopologyBuilder$$FastClassByCGLIB$$c217647a.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
+	... 6 more
+Caused by: java.lang.NullPointerException
+	at chord.Lookup.getResult(Lookup.java:52)
+	at chord.TopologyBuilder.debug(TopologyBuilder.java:372)
+	... 9 more
+FATAL [Thread-2] 2020-01-08 18:51:03,005 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (1015.0)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+Caused by: java.lang.reflect.InvocationTargetException
+	at chord.TopologyBuilder$$FastClassByCGLIB$$c217647a.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
+	... 6 more
+Caused by: java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0
+	at java.base/jdk.internal.util.Preconditions.outOfBounds(Preconditions.java:64)
+	at java.base/jdk.internal.util.Preconditions.outOfBoundsCheckIndex(Preconditions.java:70)
+	at java.base/jdk.internal.util.Preconditions.checkIndex(Preconditions.java:248)
+	at java.base/java.util.Objects.checkIndex(Objects.java:372)
+	at java.base/java.util.ArrayList.get(ArrayList.java:458)
+	at chord.Node.find_successor(Node.java:184)
+	at chord.Node.lookup(Node.java:850)
+	at chord.TopologyBuilder.lookup(TopologyBuilder.java:291)
+	... 9 more
+FATAL [Thread-2] 2020-01-08 18:58:29,441 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (460.0)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+Caused by: java.lang.reflect.InvocationTargetException
+	at chord.TopologyBuilder$$FastClassByCGLIB$$c217647a.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
+	... 6 more
+Caused by: java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0
+	at java.base/jdk.internal.util.Preconditions.outOfBounds(Preconditions.java:64)
+	at java.base/jdk.internal.util.Preconditions.outOfBoundsCheckIndex(Preconditions.java:70)
+	at java.base/jdk.internal.util.Preconditions.checkIndex(Preconditions.java:248)
+	at java.base/java.util.Objects.checkIndex(Objects.java:372)
+	at java.base/java.util.ArrayList.get(ArrayList.java:458)
+	at chord.Node.find_successor(Node.java:185)
+	at chord.Node.lookup(Node.java:851)
+	at chord.TopologyBuilder.lookup(TopologyBuilder.java:291)
 	... 9 more

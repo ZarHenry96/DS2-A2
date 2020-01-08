@@ -5,7 +5,7 @@ import repast.simphony.util.collections.Pair;
 
 public class Lookup {
 	private Integer id;
-	private Integer node_req_id;
+	private Node node_req;
 	private Integer node_res_id;
 	private Integer request_key;
 	private Integer path_length;
@@ -15,9 +15,9 @@ public class Lookup {
 	private Pair<Boolean, Boolean> result;
 	
 	
-	public Lookup(Integer id, Integer node_req_id, Integer request_key, Double tick) {
+	public Lookup(Integer id, Node node_req, Integer request_key, Double tick) {
 		this.id = id;
-		this.node_req_id = node_req_id;
+		this.node_req = node_req;
 		this.starting_tick = tick;
 		this.request_key = request_key;
 	}
@@ -28,15 +28,27 @@ public class Lookup {
 		this.nodes_contacted = nodes_contacted;
 		if(this.path_length != -1 && this.nodes_contacted != -1 ) {
 			this.result = new Pair<Boolean, Boolean>(nodeRes.getData().containsKey(this.request_key), nodeRes.isCrashed());
-		}else {
+		} else {
 			this.result = new Pair<Boolean, Boolean>(false, false);
 		}
 		
+		/*
+		if(!this.result.getFirst()) {
+			System.out.println("QUerrrrrrrrrrrrrrrrrrryy");
+			System.out.println(this.starting_tick);
+			System.out.println(this.request_key);
+			System.out.println(this.node_req.getId());
+			node_req.debug();
+			System.out.println(this.path_length);
+			System.out.println(this.nodes_contacted);
+			RunEnvironment.getInstance().pauseRun();
+		}
+		*/
 		this.final_tick = RunEnvironment.getInstance().getCurrentSchedule().getTickCount();
 		
 	}
 	
-	public boolean getResult() {
+	public Boolean getResult() {
 		return this.result.getFirst();
 	};
 }

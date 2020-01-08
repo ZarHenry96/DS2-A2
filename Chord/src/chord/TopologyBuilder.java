@@ -284,9 +284,9 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		int i = 0;
 		while(i < this.number_lookup) {
 			Node rndNode =  (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
-			if(!rndNode.isCrashed()) {
+			if(rndNode.isInitialized() && !rndNode.isCrashed()) {
 				int hashKey = (new ArrayList<Integer>(this.keys)).get(this.rnd.nextInt(this.keys.size()));
-				Lookup newLookup = new Lookup(this.lookup_table.size(), rndNode.getId(), hashKey, RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
+				Lookup newLookup = new Lookup(this.lookup_table.size(), rndNode, hashKey, RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
 				this.lookup_table.add(newLookup);
 				rndNode.lookup(hashKey, this.lookup_table.size()-1);
 				i++;
@@ -316,54 +316,62 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 			}
 		}
 		
-		for(Node node: leaving_nodes ) {
-			SortedSet<Node> greaterNodes = this.active_nodes.tailSet(node);
-			SortedSet<Node> smallerNodes = this.active_nodes.headSet(node);
-			
-			boolean nodeIsTheGreatest = true;
-			boolean alredyFoundValidSucc = false;
-			for(Node greaterNode: greaterNodes) {
-				if(!leaving_nodes.contains(greaterNode) && !alredyFoundValidSucc) {
-					greaterNode.newData(node.getData());
-					node.leave();
-					nodeIsTheGreatest = false;
-					alredyFoundValidSucc = true;
-					
-				}
-			}
-			if(nodeIsTheGreatest) {
-				for(Node smallerNode: smallerNodes) {
-					if(!leaving_nodes.contains(smallerNode)) {
-						smallerNode.newData(node.getData());
-						node.leave();
-						alredyFoundValidSucc = true;
-						
-					}
-				}
-			}
-			System.out.println("Leaving!!! "+node.getId()+"  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount() );
-			context.remove(node);
-			this.active_nodes.remove(node);
-			
+		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
+		
+		int i = 0;
+		for(Node n: leaving_nodes) {
+			double t = schedule.getTickCount()+i;
+			ScheduleParameters scheduleParams = ScheduleParameters.createOneTime(t);
+			schedule.schedule(scheduleParams, this, "exitNode", context, n, leaving_nodes);
+			i++;
 		}
 		
 		System.out.println(this.active_nodes.size());
 		System.out.println("++++++++++++++++++++++++++++   ");
-		 
-		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
-		double time = schedule.getTickCount()+join_interval;
+		
+		double time = schedule.getTickCount()+i+join_interval;
 		System.out.println(schedule.getTickCount()+" join scheduled at "+ time);
 		ScheduleParameters scheduleParamsJoin = ScheduleParameters.createOneTime(time);
 		schedule.schedule(scheduleParamsJoin, this, "join_new_nodes", context, space);
 		
 	}
 	
+	public void exitNode(Context<Object> context, Node node, HashSet<Node> leaving_nodes) {
+		SortedSet<Node> greaterNodes = this.active_nodes.tailSet(node);
+		SortedSet<Node> smallerNodes = this.active_nodes.headSet(node);
+		
+		boolean nodeIsTheGreatest = true;
+		boolean alredyFoundValidSucc = false;
+		for(Node greaterNode: greaterNodes) {
+			if(!leaving_nodes.contains(greaterNode) && !alredyFoundValidSucc) {
+				greaterNode.newData(node.getData());
+				node.leave();
+				nodeIsTheGreatest = false;
+				alredyFoundValidSucc = true;
+				
+			}
+		}
+		if(nodeIsTheGreatest) {
+			for(Node smallerNode: smallerNodes) {
+				if(!leaving_nodes.contains(smallerNode)) {
+					smallerNode.newData(node.getData());
+					node.leave();
+					alredyFoundValidSucc = true;
+					
+				}
+			}
+		}
+		System.out.println("Leaving!!! "+node.getId()+"  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount() );
+		context.remove(node);
+		this.active_nodes.remove(node);
+	}
+	
 	public void debug() {
 		int i = 0;
 		for(Lookup l: this.lookup_table) {
-			if(l.getResult()) {
-				i ++;
-			}else {
+			if(l.getResult() != null && l.getResult()) {
+				i++;
+			} else {
 				System.out.println(l);
 			}
 		}
