@@ -1,8 +1,5 @@
 package chord;
 
-
-import repast.simphony.engine.environment.RunEnvironment;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -45,19 +42,10 @@ public class FingerTable {
 		return keys;
 	}
 	
-	public void setEntry(Node a, int index, Node node) {
-		if (index == 1) {
-			System.out.println("Successor changed!!!");
-			System.out.println("new successor: "+node.getId());
-			a.debug();
-		}
-		
+	public void setEntry(int index, Node node) {
 		if(index > 0 && index <= size) {
 			this.table.put(index, node);
 		}
-		
-		
-		
 	}
 	
 	public void removeEntry(int index) {
@@ -73,6 +61,7 @@ public class FingerTable {
 		}
 	}
 	
+	/*
 	public void enforceConsistency(int index) {
 		Node successor = this.table.get(1);
 		Node fixed = this.table.get(index);
@@ -89,7 +78,7 @@ public class FingerTable {
 			}
 		}
 	}
-	
+	*/
 	
 	public void clearTable() {
 		this.table.clear();

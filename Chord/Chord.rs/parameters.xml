@@ -18,6 +18,12 @@
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
+				<parameter name="crash_scheduling_interval" displayName="Crash: scheduling interval" type="double" 
+						defaultValue="20.0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+									
+		/>
 				<parameter name="stab_amplitude" displayName="Amplitude of interval for stabilization" type="int" 
 						defaultValue="0" 
 						isReadOnly="false" 

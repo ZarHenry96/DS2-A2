@@ -23,7 +23,7 @@ import repast.simphony.space.graph.Network;
 import repast.simphony.engine.schedule.ISchedule;
 import repast.simphony.engine.schedule.ScheduleParameters;
 /**
- * This class loads all the parameters, after that initialises the chord ring and nodes, finally it schedules joins and leaves of batch of nodes from the chord ring. 
+ * This class loads all the parameters, after that initializes the chord ring and nodes, finally it schedules joins and leaves of batch of nodes from the chord ring. 
  */
 public class TopologyBuilder implements ContextBuilder<Object> {
 
@@ -51,6 +51,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		
 		int seed = params.getInteger("randomSeed");
 		double crash_pr = params.getDouble("crash_pr");
+		double crash_scheduling_interval = params.getDouble("crash_scheduling_interval");
 		double recovery_interval = params.getDouble("recovery_interval");
 		int succesors_size = params.getInteger("succesors_size");
 		double stab_offset = params.getDouble("stab_offset");
@@ -70,7 +71,6 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		int data_size = params.getInteger("data_size");
 		int key_size = params.getInteger("key_size") > data_size ?  data_size : params.getInteger("key_size");
 		int total_number_data = params.getInteger("total_number_data");
-		
 		
 		double join_interval = params.getDouble("join_interval") > stab_offset+stab_amplitude ? params.getDouble("join_interval") : stab_offset+stab_amplitude+1; //the joins of new node MUST happens after at least a stab.
 		this.min_number_joins = params.getInteger("min_number_joins");
@@ -108,7 +108,8 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 					i,
 					center+radius*Math.sin(Math.toRadians((360.0/num_nodes)*i)), 
 					center+radius*Math.cos(Math.toRadians((360.0/num_nodes)*i)),
-					crash_pr, 
+					crash_pr,
+					crash_scheduling_interval,
 					recovery_interval,
 					succesors_size,
 					stab_offset,
@@ -152,7 +153,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 
 		schedule.schedule(scheduleParamsleave, this, "leaving_nodes", context, space, join_interval);
 		
-		ScheduleParameters scheduleParamsDebug = ScheduleParameters.createOneTime(1000);
+		ScheduleParameters scheduleParamsDebug = ScheduleParameters.createOneTime(2000);
 		schedule.schedule(scheduleParamsDebug, this, "debug");
 		
 		
@@ -231,20 +232,32 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 				this.keys.add(hashKey);
 				HashMap<Integer, String> dataMap = new HashMap<>();
 				dataMap.put(hashKey, data);
-				Iterator it = this.active_nodes.iterator();
+				Iterator<Node> it = this.active_nodes.iterator();
 				Boolean find = false;
 				while(it.hasNext() && !find) {
-					Node node = (Node)it.next();
+					Node node = it.next();
 					if (node.getId() >= hashKey) {
-						//System.out.println("OOOOOOOOOOOOOOOOOOOOOO");
 						node.newData(dataMap);
-						//node.debug();
 						find = true;
 					}
 				}
 				if(find == false) { //there is no node with an id greater than the hashKey so go to the first node
 					this.active_nodes.first().newData(dataMap);
 				}
+			}
+		}
+	}
+	
+	public void lookup() {
+		int i = 0;
+		while(i < this.number_lookup) {
+			Node rndNode =  (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
+			if(rndNode.isInitialized() && !rndNode.isCrashed()) {
+				int hashKey = (new ArrayList<Integer>(this.keys)).get(this.rnd.nextInt(this.keys.size()));
+				Lookup newLookup = new Lookup(this.lookup_table.size(), rndNode.getId(), hashKey, RunEnvironment.getInstance().getCurrentSchedule().getTickCount(), this);
+				this.lookup_table.add(newLookup);
+				rndNode.lookup(hashKey, this.lookup_table.size()-1);
+				i++;
 			}
 		}
 	}
@@ -268,35 +281,20 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 				context.add(rndNode);
 				space.moveTo(rndNode, rndNode.getX(), rndNode.getY());
 				Node succ_node = rndNode;
-				while (succ_node.equals(rndNode) || new_join_ids.contains(succ_node.getId())){
+				while (succ_node.equals(rndNode) || new_join_ids.contains(succ_node.getId()) || succ_node.isCrashed()){
 					succ_node = (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
 				}
 
-				System.out.println("joining "+rndNode.getId()+ "  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
-				System.out.println("joining with "+succ_node.getId());
+				System.out.println("\nJoining "+rndNode.getId()+ "  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
+				System.out.println("Joining with "+succ_node.getId());
 				rndNode.join(succ_node);
 			}
 		}
 		
 	}
 	
-	public void lookup() {
-		int i = 0;
-		while(i < this.number_lookup) {
-			Node rndNode =  (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
-			if(rndNode.isInitialized() && !rndNode.isCrashed()) {
-				int hashKey = (new ArrayList<Integer>(this.keys)).get(this.rnd.nextInt(this.keys.size()));
-				Lookup newLookup = new Lookup(this.lookup_table.size(), rndNode, hashKey, RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
-				this.lookup_table.add(newLookup);
-				rndNode.lookup(hashKey, this.lookup_table.size()-1);
-				i++;
-			}
-		}
-		
-	}
-	
 	/**
-	 * This method is in charge to remove a variable number of nodes  (between min_number_leave and this.min_number_leave + leave_amplitude) in the chord ring periodically, 
+	 * This method is in charge to remove a variable number of nodes (between min_number_leave and this.min_number_leave + leave_amplitude) in the chord ring periodically, 
 	 * at least one node is left in the chord ring. 
 	 * To ensure that the nodes in the ring are correctly the first call is scheduled after stab_offset+stab_amplitude tick after the last node join in the initialization phase.
 	 * After the first call the method is scheduled every leave_interval
@@ -304,8 +302,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	 * @param space
 	 */
 	public void leaving_nodes(Context<Object> context, ContinuousSpace<Object> space, double join_interval) {
-		System.out.println("++++++++++++++++++++++++++++");
-		System.out.println(this.active_nodes.size());
+		System.out.println("\nActive nodes before leaving: "+this.active_nodes.size());
 		int exiting_nodes_number = this.min_number_leaving + this.rnd.nextInt(this.leaving_amplitude);
 		exiting_nodes_number = exiting_nodes_number >= this.active_nodes.size() ? this.active_nodes.size() - 1 : exiting_nodes_number;
 		HashSet<Node> leaving_nodes = new HashSet<>();
@@ -322,33 +319,34 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		for(Node n: leaving_nodes) {
 			double t = schedule.getTickCount()+i;
 			ScheduleParameters scheduleParams = ScheduleParameters.createOneTime(t);
-			schedule.schedule(scheduleParams, this, "exitNode", context, n, leaving_nodes);
+			schedule.schedule(scheduleParams, this, "nodeExit", context, n, leaving_nodes);
 			i++;
 		}
 		
-		System.out.println(this.active_nodes.size());
-		System.out.println("++++++++++++++++++++++++++++   ");
+		System.out.println("Active nodes after leaving: "+this.active_nodes.size());
 		
 		double time = schedule.getTickCount()+i+join_interval;
-		System.out.println(schedule.getTickCount()+" join scheduled at "+ time);
 		ScheduleParameters scheduleParamsJoin = ScheduleParameters.createOneTime(time);
 		schedule.schedule(scheduleParamsJoin, this, "join_new_nodes", context, space);
 		
+		System.out.println("\n"+schedule.getTickCount()+" next join batch scheduled at "+ time);
 	}
 	
-	public void exitNode(Context<Object> context, Node node, HashSet<Node> leaving_nodes) {
+	public void nodeExit(Context<Object> context, Node node, HashSet<Node> leaving_nodes) {
 		SortedSet<Node> greaterNodes = this.active_nodes.tailSet(node, false);
 		
 		SortedSet<Node> smallerNodes = this.active_nodes.headSet(node, false);
+		/*
 		for(Node smallerNode: smallerNodes) {
 			System.out.println("small node "+smallerNode.getId());
 		}
+		*/
 		
 		boolean nodeIsTheGreatest = true;
 		boolean alredyFoundValidSucc = false;
-		System.out.println("node "+node.getId());
+		// System.out.println("node "+node.getId());
 		for(Node greaterNode: greaterNodes) {
-			System.out.println("great node "+greaterNode.getId());
+			// System.out.println("great node "+greaterNode.getId());
 			if(!leaving_nodes.contains(greaterNode) && !alredyFoundValidSucc) {
 				greaterNode.newData(node.getData());
 				node.leave();
@@ -369,9 +367,15 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 				}
 			}
 		}
-		System.out.println("Leaving!!! "+node.getId()+"  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount() );
+		System.out.println("\nLeaving node "+node.getId()+"  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount() );
 		context.remove(node);
 		this.active_nodes.remove(node);
+	}
+	
+	public void printAll() {
+		for(Node n: this.active_nodes) {
+			n.debug();
+		}
 	}
 	
 	public void debug() {
@@ -385,6 +389,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		}
 		
 		System.out.println("################### "+i+":"+this.lookup_table.size());
+		RunEnvironment.getInstance().pauseRun();
 	}
 }
 
