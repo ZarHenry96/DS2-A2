@@ -229,7 +229,7 @@ public class Node implements Comparable<Node>{
 			if(this.successors.isEmpty()) {
 				System.out.println("BAAAAAAAAAAA");
 				this.debug();
-				RunEnvironment.getInstance().pauseRun();
+				//RunEnvironment.getInstance().pauseRun();
 			}
 			
 			if(Utils.belongsToInterval(id, this.id, this.successors.get(0).getId())) {
@@ -416,7 +416,7 @@ public class Node implements Comparable<Node>{
 							System.out.println("Already contained node!!!");
 							System.out.println(position);
 							this.debug();
-							RunEnvironment.getInstance().pauseRun();
+							//RunEnvironment.getInstance().pauseRun();
 						}
 					}
 				}
@@ -712,7 +712,7 @@ public class Node implements Comparable<Node>{
 		this.data.putAll(data);
 		
 		System.out.println(data);
-		RunEnvironment.getInstance().pauseRun();
+		//RunEnvironment.getInstance().pauseRun();
 	}
 	
 	/**
@@ -735,7 +735,7 @@ public class Node implements Comparable<Node>{
 		this.debug();
 		System.out.println("to key: "+target_key);
 		System.out.println(dataToTransfer);
-		RunEnvironment.getInstance().pauseRun();
+		//RunEnvironment.getInstance().pauseRun();
 		
 		return dataToTransfer;
 	}

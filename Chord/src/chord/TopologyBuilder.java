@@ -337,12 +337,18 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	}
 	
 	public void exitNode(Context<Object> context, Node node, HashSet<Node> leaving_nodes) {
-		SortedSet<Node> greaterNodes = this.active_nodes.tailSet(node);
-		SortedSet<Node> smallerNodes = this.active_nodes.headSet(node);
+		SortedSet<Node> greaterNodes = this.active_nodes.tailSet(node, false);
+		
+		SortedSet<Node> smallerNodes = this.active_nodes.headSet(node, false);
+		for(Node smallerNode: smallerNodes) {
+			System.out.println("small node "+smallerNode.getId());
+		}
 		
 		boolean nodeIsTheGreatest = true;
 		boolean alredyFoundValidSucc = false;
+		System.out.println("node "+node.getId());
 		for(Node greaterNode: greaterNodes) {
+			System.out.println("great node "+greaterNode.getId());
 			if(!leaving_nodes.contains(greaterNode) && !alredyFoundValidSucc) {
 				greaterNode.newData(node.getData());
 				node.leave();
@@ -352,8 +358,10 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 			}
 		}
 		if(nodeIsTheGreatest) {
+			alredyFoundValidSucc = false;
 			for(Node smallerNode: smallerNodes) {
-				if(!leaving_nodes.contains(smallerNode)) {
+				System.out.println("small node "+smallerNode.getId());
+				if(!leaving_nodes.contains(smallerNode)   && !alredyFoundValidSucc) {
 					smallerNode.newData(node.getData());
 					node.leave();
 					alredyFoundValidSucc = true;
