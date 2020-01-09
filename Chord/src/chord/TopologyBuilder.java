@@ -38,6 +38,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	private ArrayList<Lookup> lookup_table;
 	private double lookup_interval;
 	private int number_lookup;
+	private int forced_to_leave;
 	
 	/**
 	 * Repast constructor loads the simulation parameters, init nodes and chord ring and finally schedules joins and leaves. 
@@ -100,6 +101,8 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		this.lookup_table = new ArrayList<>();
 		
 		this.all_nodes = new ArrayList<>();
+		this.forced_to_leave = 0;
+		
 		for (int i = 0; i < num_nodes; i++) {
 			Node node = new Node(
 					this,
@@ -420,6 +423,15 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		
 		System.out.println("################### "+i+":"+this.lookup_table.size());
 		RunEnvironment.getInstance().pauseRun();
+	}
+	
+	public void force_to_leave(Node node) {
+		this.active_nodes.remove(node);
+		this.forced_to_leave++;
+	}
+	
+	public int getForce_to_leave() {
+		return this.forced_to_leave;
 	}
 }
 
