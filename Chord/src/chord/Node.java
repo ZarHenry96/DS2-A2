@@ -47,6 +47,8 @@ public class Node implements Comparable<Node>{
 	private HashMap<Integer, String> data;
 	private ArrayList<Lookup> lookup_table;
 	
+	private TopologyBuilder top;
+	
 	/**
 	 * Public constructor
 	 * @param viewNet network
@@ -61,7 +63,7 @@ public class Node implements Comparable<Node>{
 	 * @param stab_offset minimum offset between stabilizations
 	 * @param stab_amplitude maximum interval to be added to the offset
 	 */
-	public Node(Network<Object> viewNet, Random rnd, int hash_size, int id, double x, double y, double crash_pr, double crash_scheduling_interval, double recovery_interval, int successors_size, double stab_offset, int stab_amplitude, ArrayList<Lookup> lookup_table) {
+	public Node(TopologyBuilder top, Network<Object> viewNet, Random rnd, int hash_size, int id, double x, double y, double crash_pr, double crash_scheduling_interval, double recovery_interval, int successors_size, double stab_offset, int stab_amplitude, ArrayList<Lookup> lookup_table) {
 		this.viewNet = viewNet;
 		this.rnd = rnd;
 		this.hash_size = hash_size;
@@ -88,10 +90,11 @@ public class Node implements Comparable<Node>{
 		
 		this.stab_offset = stab_offset;
 		this.stab_amplitude = stab_amplitude+1;
-		this.stabphase = false;
+		this.stabphase = true;
 		
 		this.data = new HashMap<>();
 		this.lookup_table = lookup_table;
+		this.top = top;
 	}
 	
 	/**
@@ -342,16 +345,23 @@ public class Node implements Comparable<Node>{
 						this.successors.set(0, successor);
 					}
 				} else if (!successor.equals(this)){
+					System.out.println("Start pos: "+position);
+					System.out.println("Last stab: "+this.last_stabilized_succ.getId());
+					
 					int i = 0;
 					while(i < this.successors.size() && Utils.belongsToInterval(this.successors.get(i).getId(), this.id, this.last_stabilized_succ.getId())) {
 						i++;
 					}
 					position = i;
 					
+					this.debug();
+					System.out.println("Successor id: "+successor.getId());
+					System.out.println("New pos: "+position);
+					
 					this.last_stabilized_succ = successor;
 					
 					if(position >= this.successors.size()) {
-						if(!this.successors.get(this.successors.size()-1).equals(successor)) {
+						if(!this.successors.contains(successor)) {
 							this.successors.add(successor);
 						}
 					} else {
@@ -389,6 +399,7 @@ public class Node implements Comparable<Node>{
 							System.out.println(position);
 							this.debug();
 							RunEnvironment.getInstance().pauseRun();
+							top.printAll();
 						}
 					}
 				}
@@ -421,6 +432,12 @@ public class Node implements Comparable<Node>{
 	 * @throws RuntimeException if all successor have been contacted with no luck
 	 */
 	public void stabilization(int retryCount) {
+		if(this.predecessor != null && !this.successors.isEmpty() && this.successors.get(0).equals(this.predecessor)) {
+			top.printAll();
+			System.out.println("---------------------------------------");
+			this.debug();
+			RunEnvironment.getInstance().pauseRun();
+		}
 		if(this.subscribed && !this.crashed) {
 			boolean noMoreSucc = false;
 			Node suc = null;
@@ -429,6 +446,11 @@ public class Node implements Comparable<Node>{
 			} catch (IndexOutOfBoundsException e) { 
 				//throw new RuntimeException("Node "+this.id+": Error! All successors are dead or disconnected, cannot stabilize!");
 				System.out.println("Node "+this.id+": Error! All successors are dead or disconnected, cannot stabilize! "+this.successors);
+				System.out.println("Stablization");
+				this.debug();
+				System.out.println("************************");
+				top.printAll();
+				RunEnvironment.getInstance().pauseRun();
 				noMoreSucc = true;
 			} 
 			
@@ -754,6 +776,9 @@ public class Node implements Comparable<Node>{
 	public void leave() {
 		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 		
+		System.out.println("LEAVEEEEEEEEEEEEEEEEE");
+		this.debug();
+		
 		if(!successors.isEmpty()) {
 			Node successor = this.successors.get(0);
 			ScheduleParameters scheduleParameters = ScheduleParameters
@@ -763,6 +788,7 @@ public class Node implements Comparable<Node>{
 			} else {
 				schedule.schedule(scheduleParameters, successor, "resetPredecessor");
 			}
+			System.out.println("Changing predecessor of "+this.predecessor);
 			if(!this.data.isEmpty()) {
 				schedule.schedule(scheduleParameters, successor, "newData", this.data);
 			}
@@ -772,8 +798,10 @@ public class Node implements Comparable<Node>{
 			ScheduleParameters scheduleParameters = ScheduleParameters
 					.createOneTime(schedule.getTickCount() + Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay));
 			schedule.schedule(scheduleParameters, this.predecessor, "setLastSuccessor", this.successors.get(0), this.successors.get(this.successors.size()-1));		
+			System.out.println("Changing successors of "+this.predecessor+ "Using params: "+this.successors.get(0)+" and "+this.successors.get(this.successors.size()-1));
 		}
 		
+		this.crashed = false;
 		this.initialized = false;
 		this.subscribed = false;
 		
@@ -809,6 +837,8 @@ public class Node implements Comparable<Node>{
 	 * @param lastSuccessor the new last successor
 	 */
 	public void setLastSuccessor(Node firstSuccessor, Node lastSuccessor) {
+		System.out.println("LAAAAAAAAAAAAAAAAASTTTT");
+		this.debug();
 		if(this.subscribed && this.initialized && !this.crashed) {
 			Node successor = this.successors.get(0);
 			
@@ -829,6 +859,12 @@ public class Node implements Comparable<Node>{
 			if(this.successors.isEmpty()) {
 				this.finger.setEntry(1, this);
 				this.successors.add(this);
+				
+				System.out.println("Last successor");
+				this.debug();
+				System.out.println("========================");
+				top.printAll();
+				RunEnvironment.getInstance().pauseRun();
 			} else {
 				this.finger.setEntry(1, this.successors.get(0));
 			}
@@ -842,9 +878,13 @@ public class Node implements Comparable<Node>{
 	 */
 	public void clearAll() {
 		this.finger.clearTable();
+		this.next = 2;
+		
 		this.successors.clear();
+		this.last_stabilized_succ = null;
 		this.resetPredecessor();
 		
+		this.stabphase = true;
 		this.data.clear();
 	}
 	

@@ -33,25 +33,25 @@ public class Lookup {
 		this.path_length = path_length;
 		this.nodes_contacted = nodes_contacted;
 		if(this.path_length != -1 && this.nodes_contacted != -1 ) {
-			this.correctResult = nodeRes.getId() == this.prioriCorrectNode ? true : (top.firstNotCashed(this.request_key) == nodeRes.getId());
+			this.correctResult = nodeRes.getId() == this.prioriCorrectNode ? true : (top.firstNotCrashed(this.request_key) == nodeRes.getId());
 			this.resultHasKey = nodeRes.getData().containsKey(this.request_key);
 			this.responsableIsCrashed = nodeRes.isCrashed();
 		} else {
-			this.correctResult = nodeRes.getId() == this.prioriCorrectNode ? true : (top.firstNotCashed(this.request_key) == nodeRes.getId());
+			this.correctResult = nodeRes.getId() == this.prioriCorrectNode ? true : (top.firstNotCrashed(this.request_key) == nodeRes.getId());
 			this.resultHasKey = false;
 			this.responsableIsCrashed = false;
 		}
 		this.final_tick = RunEnvironment.getInstance().getCurrentSchedule().getTickCount();	
 		
-		if(!this.resultHasKey) {
+		if(!this.correctResult) {
 			top.printAll();
 			System.out.println(this);
-			RunEnvironment.getInstance().pauseRun();
+			//RunEnvironment.getInstance().pauseRun();
 		}
 	}
 	
 	public Boolean getResult() {
-		return this.resultHasKey;
+		return this.correctResult;
 	}
 	
 	@Override

@@ -469,3 +469,31 @@ Caused by: java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length
 	at chord.Node.lookup(Node.java:851)
 	at chord.TopologyBuilder.lookup(TopologyBuilder.java:291)
 	... 9 more
+FATAL [Thread-2] 2020-01-09 16:00:23,670 repast.simphony.ui.GUIScheduleRunner - RunTimeException when running the schedule
+Current tick (4871.000104974498)
+java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:129)
+	at repast.simphony.engine.schedule.DefaultAction.execute(DefaultAction.java:38)
+	at repast.simphony.engine.schedule.ScheduleGroup.executeList(ScheduleGroup.java:205)
+	at repast.simphony.engine.schedule.ScheduleGroup.execute(ScheduleGroup.java:231)
+	at repast.simphony.engine.schedule.Schedule.execute(Schedule.java:352)
+	at repast.simphony.ui.GUIScheduleRunner$ScheduleLoopRunnable.run(GUIScheduleRunner.java:52)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+Caused by: java.lang.reflect.InvocationTargetException
+	at chord.Node$$FastClassByCGLIB$$faaea874.invoke(<generated>)
+	at net.sf.cglib.reflect.FastMethod.invoke(FastMethod.java:53)
+	at repast.simphony.engine.schedule.CallBackAction.execute(CallBackAction.java:127)
+	... 6 more
+Caused by: java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0
+	at java.base/jdk.internal.util.Preconditions.outOfBounds(Preconditions.java:64)
+	at java.base/jdk.internal.util.Preconditions.outOfBoundsCheckIndex(Preconditions.java:70)
+	at java.base/jdk.internal.util.Preconditions.checkIndex(Preconditions.java:248)
+	at java.base/java.util.Objects.checkIndex(Objects.java:372)
+	at java.base/java.util.ArrayList.get(ArrayList.java:458)
+	at chord.Node.processSuccRequest(Node.java:231)
+	at chord.Node.find_successor_step(Node.java:211)
+	at chord.Node.find_successor(Node.java:193)
+	at chord.Node.fix_successors(Node.java:680)
+	at chord.Node.fix_data_structures(Node.java:641)
+	at chord.Node.processStabResponse(Node.java:625)
+	... 9 more

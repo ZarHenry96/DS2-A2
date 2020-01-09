@@ -102,6 +102,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		this.all_nodes = new ArrayList<>();
 		for (int i = 0; i < num_nodes; i++) {
 			Node node = new Node(
+					this,
 					network, 
 					this.rnd, 
 					hash_size, 
@@ -153,7 +154,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 
 		schedule.schedule(scheduleParamsleave, this, "leaving_nodes", context, space, join_interval);
 		
-		ScheduleParameters scheduleParamsDebug = ScheduleParameters.createOneTime(2000);
+		ScheduleParameters scheduleParamsDebug = ScheduleParameters.createOneTime(10000);
 		schedule.schedule(scheduleParamsDebug, this, "debug");
 		
 		
@@ -256,7 +257,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 			Node rndNode =  (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
 			if(rndNode.isInitialized() && !rndNode.isCrashed()) {
 				int hashKey = (new ArrayList<Integer>(this.keys)).get(this.rnd.nextInt(this.keys.size()));
-				Lookup newLookup = new Lookup(this.lookup_table.size(), rndNode.getId(), this.firstNotCashed(hashKey), hashKey, RunEnvironment.getInstance().getCurrentSchedule().getTickCount(), this);
+				Lookup newLookup = new Lookup(this.lookup_table.size(), rndNode.getId(), this.firstNotCrashed(hashKey), hashKey, RunEnvironment.getInstance().getCurrentSchedule().getTickCount(), this);
 				this.lookup_table.add(newLookup);
 				rndNode.lookup(hashKey, this.lookup_table.size()-1);
 				i++;
@@ -310,7 +311,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		HashSet<Node> leaving_nodes = new HashSet<>();
 		while(leaving_nodes.size() != exiting_nodes_number) {
 			Node rndNode =  (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
-			if(!leaving_nodes.contains(rndNode) && !rndNode.isCrashed()) {
+			if(!leaving_nodes.contains(rndNode) && rndNode.isInitialized() && !rndNode.isCrashed()) {
 				leaving_nodes.add(rndNode);
 			}
 		}
@@ -380,7 +381,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		}
 	}
 	
-	public Integer firstNotCashed(Integer key) {
+	public Integer firstNotCrashed(Integer key) {
 		boolean find = false;
 		Node correctNode = null;
 		Iterator<Node> it = this.active_nodes.iterator();
@@ -406,6 +407,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		
 		return correctNode.getId();
 	}
+	
 	public void debug() {
 		int i = 0;
 		for(Lookup l: this.lookup_table) {

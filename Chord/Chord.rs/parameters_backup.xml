@@ -31,7 +31,7 @@
 									
 		/>
 				<parameter name="recovery_interval" displayName="Number of ticks needed for recovery" type="double" 
-						defaultValue="4.0" 
+						defaultValue="10.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
