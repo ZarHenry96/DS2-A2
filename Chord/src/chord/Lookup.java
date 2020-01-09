@@ -14,7 +14,7 @@ public class Lookup {
 	private Double final_tick;
 	private Boolean correctResult;
 	private Boolean resultHasKey;
-	private Boolean responsableIsCrashed;
+	private Boolean responsibleIsCrashed;
 	private TopologyBuilder top;
 	
 	
@@ -35,19 +35,13 @@ public class Lookup {
 		if(this.path_length != -1 && this.nodes_contacted != -1 ) {
 			this.correctResult = nodeRes.getId() == this.prioriCorrectNode ? true : (top.firstNotCrashed(this.request_key) == nodeRes.getId());
 			this.resultHasKey = nodeRes.getData().containsKey(this.request_key);
-			this.responsableIsCrashed = nodeRes.isCrashed();
+			this.responsibleIsCrashed = nodeRes.isCrashed();
 		} else {
 			this.correctResult = nodeRes.getId() == this.prioriCorrectNode ? true : (top.firstNotCrashed(this.request_key) == nodeRes.getId());
 			this.resultHasKey = false;
-			this.responsableIsCrashed = false;
+			this.responsibleIsCrashed = false;
 		}
-		this.final_tick = RunEnvironment.getInstance().getCurrentSchedule().getTickCount();	
-		
-		if(!this.correctResult) {
-			top.printAll();
-			System.out.println(this);
-			//RunEnvironment.getInstance().pauseRun();
-		}
+		this.final_tick = RunEnvironment.getInstance().getCurrentSchedule().getTickCount();
 	}
 	
 	public Boolean getResult() {
@@ -64,7 +58,7 @@ public class Lookup {
 		out += ("\nPriori node : " + this.prioriCorrectNode);
 		out += ("\nResponsible found: " + this.resultHasKey);
 		out += ("\nResulting node: "+ this.node_res_id);
-		out += ("\nNode was crashed: " + this.responsableIsCrashed);
+		out += ("\nNode was crashed: " + this.responsibleIsCrashed);
 		out += ("\nIs the first node not crashed and initalised: " + this.correctResult);
 		out += ("\nResponse tick: " + this.final_tick);
 		out += ("\nPath length: " + this.path_length);

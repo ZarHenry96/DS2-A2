@@ -61,25 +61,6 @@ public class FingerTable {
 		}
 	}
 	
-	/*
-	public void enforceConsistency(int index) {
-		Node successor = this.table.get(1);
-		Node fixed = this.table.get(index);
-		
-		for(int i=2; i <= this.size; i++) {
-			if(this.table.keySet().contains(i)){
-				Node n = this.table.get(i);
-				if(i < index && n.getId() != successor.getId() && !Utils.belongsToInterval(n.getId(), successor.getId(), fixed.getId())) {
-					this.table.remove(i);
-				}
-				if(i > index && n.getId() != fixed.getId() && (!Utils.belongsToInterval(n.getId(), fixed.getId(), successor.getId())) || n.getId() == successor.getId()) {
-					this.table.remove(i);
-				}
-			}
-		}
-	}
-	*/
-	
 	public void clearTable() {
 		this.table.clear();
 	}

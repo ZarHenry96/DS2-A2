@@ -39,6 +39,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	private double lookup_interval;
 	private int number_lookup;
 	private int forced_to_leave;
+	private int additional_joins;
 	
 	/**
 	 * Repast constructor loads the simulation parameters, init nodes and chord ring and finally schedules joins and leaves. 
@@ -102,6 +103,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		
 		this.all_nodes = new ArrayList<>();
 		this.forced_to_leave = 0;
+		this.additional_joins = 0;
 		
 		for (int i = 0; i < num_nodes; i++) {
 			Node node = new Node(
@@ -127,8 +129,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		active_nodes = new TreeSet<>();
 		
 		if (one_at_time_init) {
-			if (this.active_nodes.size() != init_num_nodes) {
-				
+			if (this.active_nodes.size() != init_num_nodes) {	
 				ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 				ScheduleParameters scheduleParams = ScheduleParameters.createOneTime(schedule.getTickCount()+1);
 				schedule.schedule(scheduleParams, this, "one_at_time_init", init_num_nodes, insertion_delay, context, space);
@@ -157,9 +158,8 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 
 		schedule.schedule(scheduleParamsleave, this, "leaving_nodes", context, space, join_interval);
 		
-		ScheduleParameters scheduleParamsDebug = ScheduleParameters.createOneTime(10000);
+		ScheduleParameters scheduleParamsDebug = ScheduleParameters.createOneTime(60000);
 		schedule.schedule(scheduleParamsDebug, this, "debug");
-		
 		
 		return context;
 	}
@@ -268,6 +268,33 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		}
 	}
 	
+	public Integer firstNotCrashed(Integer key) {
+		boolean find = false;
+		Node correctNode = null;
+		Iterator<Node> it = this.active_nodes.iterator();
+		while(it.hasNext() && !find) {
+			Node node = it.next();
+			if(!node.isCrashed() && node.isInitialized() && node.getId() >= key) {
+				find = true;
+				correctNode = node;
+				
+			}
+		}
+		if(!find) {
+			it = this.active_nodes.iterator();
+			while(it.hasNext() && !find) {
+				Node node = it.next();
+				if(!node.isCrashed() && node.isInitialized() && node.getId() < key) {
+					find = true;
+					correctNode = node;
+					
+				}
+			}
+		}
+		
+		return correctNode.getId();
+	}
+	
 	/**
 	 * This method is in charge to add a variable number of nodes (between min_number_joins and this.min_number_joins + join_amplitude) in the chord ring periodically, 
 	 * if all the available nodes are inserted no new nodes are inserted. 
@@ -276,7 +303,8 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	 * @param space the 2D space where add nodes
 	 */
 	public void join_new_nodes(Context<Object> context, ContinuousSpace<Object> space) {
-		int final_nodes_number = this.active_nodes.size() + this.min_number_joins + this.rnd.nextInt(this.join_amplitude);
+		int final_nodes_number = this.active_nodes.size() + this.min_number_joins + this.rnd.nextInt(this.join_amplitude) + this.additional_joins;
+		this.additional_joins = 0;
 		final_nodes_number  =  final_nodes_number > this.all_nodes.size() ? this.all_nodes.size() : final_nodes_number;
 		HashSet<Integer> new_join_ids = new HashSet<>();
 		while (this.active_nodes.size() != final_nodes_number ){
@@ -378,37 +406,15 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		this.active_nodes.remove(node);
 	}
 	
-	public void printAll() {
-		for(Node n: this.active_nodes) {
-			n.debug();
-		}
+	public void forced_to_leave(Context<Object> context, Node node) {
+		this.active_nodes.remove(node);
+		context.remove(node);
+		this.forced_to_leave++;
+		this.additional_joins++;
 	}
 	
-	public Integer firstNotCrashed(Integer key) {
-		boolean find = false;
-		Node correctNode = null;
-		Iterator<Node> it = this.active_nodes.iterator();
-		while(it.hasNext() && !find) {
-			Node node = it.next();
-			if(!node.isCrashed() && node.isInitialized() && node.getId() >= key) {
-				find = true;
-				correctNode = node;
-				
-			}
-		}
-		if(!find) {
-			it = this.active_nodes.iterator();
-			while(it.hasNext() && !find) {
-				Node node = it.next();
-				if(!node.isCrashed() && node.isInitialized() && node.getId() < key) {
-					find = true;
-					correctNode = node;
-					
-				}
-			}
-		}
-		
-		return correctNode.getId();
+	public int getForcedToLeave() {
+		return this.forced_to_leave;
 	}
 	
 	public void debug() {
@@ -422,16 +428,14 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		}
 		
 		System.out.println("################### "+i+":"+this.lookup_table.size());
+		System.out.println("Forced l: "+ this.forced_to_leave);
 		RunEnvironment.getInstance().pauseRun();
 	}
 	
-	public void force_to_leave(Node node) {
-		this.active_nodes.remove(node);
-		this.forced_to_leave++;
-	}
-	
-	public int getForce_to_leave() {
-		return this.forced_to_leave;
+	public void printAll() {
+		for(Node n: this.active_nodes) {
+			n.debug();
+		}
 	}
 }
 
