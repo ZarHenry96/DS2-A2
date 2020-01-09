@@ -169,28 +169,30 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	 * @param space the 2D space where add nodes
 	 */
 	public void one_at_time_init(int init_num_nodes, double insertion_delay, Context<Object> context, ContinuousSpace<Object> space) {
-		Node node = this.all_nodes.get(this.rnd.nextInt(this.all_nodes.size()));
 		
-		if(!this.active_nodes.contains(node)) {
-			
-			this.active_nodes.add(node);
-			context.add(node);
-			space.moveTo(node, node.getX(), node.getY());
-			if (this.active_nodes.size() == 1) {
-				node.create();
-				
-			}else {
-				
-				Node succ_node = node;
-				while (succ_node.equals(node)){
-					succ_node = (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
-				}
-				System.out.println("joining "+node.getId());
-				System.out.println("joining with "+succ_node.getId());
-				System.out.println(this.active_nodes.size());
-				node.join(succ_node);
-			}
+		Node node = this.all_nodes.get(this.rnd.nextInt(this.all_nodes.size()));
+		while(this.active_nodes.contains(node)) {
+			node = this.all_nodes.get(this.rnd.nextInt(this.all_nodes.size()));
 		}
+			
+		this.active_nodes.add(node);
+		context.add(node);
+		space.moveTo(node, node.getX(), node.getY());
+		if (this.active_nodes.size() == 1) {
+			node.create();
+			
+		}else {
+			
+			Node succ_node = node;
+			while (succ_node.equals(node)){
+				succ_node = (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
+			}
+			System.out.println("joining "+node.getId());
+			System.out.println("joining with "+succ_node.getId());
+			System.out.println(this.active_nodes.size());
+			node.join(succ_node);
+		}
+		
 		if (this.active_nodes.size() != init_num_nodes) {
 			ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 			ScheduleParameters scheduleParams = ScheduleParameters.createOneTime(schedule.getTickCount()+insertion_delay);
@@ -254,7 +256,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 			Node rndNode =  (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
 			if(rndNode.isInitialized() && !rndNode.isCrashed()) {
 				int hashKey = (new ArrayList<Integer>(this.keys)).get(this.rnd.nextInt(this.keys.size()));
-				Lookup newLookup = new Lookup(this.lookup_table.size(), rndNode.getId(), hashKey, RunEnvironment.getInstance().getCurrentSchedule().getTickCount(), this);
+				Lookup newLookup = new Lookup(this.lookup_table.size(), rndNode.getId(), this.firstNotCashed(hashKey), hashKey, RunEnvironment.getInstance().getCurrentSchedule().getTickCount(), this);
 				this.lookup_table.add(newLookup);
 				rndNode.lookup(hashKey, this.lookup_table.size()-1);
 				i++;
@@ -378,6 +380,32 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		}
 	}
 	
+	public Integer firstNotCashed(Integer key) {
+		boolean find = false;
+		Node correctNode = null;
+		Iterator<Node> it = this.active_nodes.iterator();
+		while(it.hasNext() && !find) {
+			Node node = it.next();
+			if(!node.isCrashed() && node.isInitialized() && node.getId() >= key) {
+				find = true;
+				correctNode = node;
+				
+			}
+		}
+		if(!find) {
+			it = this.active_nodes.iterator();
+			while(it.hasNext() && !find) {
+				Node node = it.next();
+				if(!node.isCrashed() && node.isInitialized() && node.getId() < key) {
+					find = true;
+					correctNode = node;
+					
+				}
+			}
+		}
+		
+		return correctNode.getId();
+	}
 	public void debug() {
 		int i = 0;
 		for(Lookup l: this.lookup_table) {
