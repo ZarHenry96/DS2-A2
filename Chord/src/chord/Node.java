@@ -132,8 +132,8 @@ public class Node implements Comparable<Node>{
 	public void initSuccessor(Node successor) {
 		this.resetPredecessor();
 		this.successors.add(successor);
-		this.initialized = true;
 		this.subscribed = true;
+		this.initialized = true;
 		
 		this.stabilization(0);
 		
@@ -315,15 +315,11 @@ public class Node implements Comparable<Node>{
 	 * @param nodes_contacted number of nodes contacted
 	 */
 	private void setResult(Node successor, String target_dt, int position, int path_length, int nodes_contacted) {
-		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 		switch(target_dt) {
 			case "init":
 				this.finger.setEntry(position, successor);
 				this.successors.add(successor);
-				this.initialized = true;
 				this.stabilization(0);
-				ScheduleParameters scheduleParams = ScheduleParameters.createOneTime(schedule.getTickCount()+this.crash_scheduling_interval);
-				schedule.schedule(scheduleParams, this, "nodeCrash");
 				break;
 			case "finger":
 				if(position == 1) {
@@ -350,13 +346,6 @@ public class Node implements Comparable<Node>{
 					while(i < this.successors.size() && Utils.belongsToInterval(this.successors.get(i).getId(), this.id, this.last_stabilized_succ.getId())) {
 						i++;
 					}
-					/*
-					System.out.println("Last stabilized: "+this.last_stabilized_succ.getId());
-					System.out.println("i: "+i);
-					if(i < this.successors.size()) {
-						System.out.println("In posizione i: "+this.successors.get(i).getId());
-					}
-					*/
 					position = i;
 					
 					this.last_stabilized_succ = successor;
@@ -405,6 +394,7 @@ public class Node implements Comparable<Node>{
 				}
 				break;
 			case "lookup":
+				ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 				ScheduleParameters scheduleParameters = ScheduleParameters
 						.createOneTime(schedule.getTickCount() + Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay)/1000);
 				schedule.schedule(scheduleParameters, this.lookup_table.get(position), "setResult", successor, path_length, nodes_contacted);
@@ -559,10 +549,13 @@ public class Node implements Comparable<Node>{
 			
 			ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 			
-			ScheduleParameters scheduleParameters = ScheduleParameters
-					.createOneTime(schedule.getTickCount() + Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay)/1000);
-			schedule.schedule(scheduleParameters, this.predecessor, "newData", this.transferDataUpToKey(this.predecessor.getId()));
-			
+			HashMap<Integer,String> dataToTransfer = this.transferDataUpToKey(this.predecessor.getId());
+			if(!dataToTransfer.isEmpty()) {
+				ScheduleParameters scheduleParameters = ScheduleParameters
+						.createOneTime(schedule.getTickCount() + Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay)/1000);
+				schedule.schedule(scheduleParameters, this.predecessor, "newData", dataToTransfer);
+			}
+				
 			if(prev_predecessor != null) {
 				ScheduleParameters scheduleParameters2 = ScheduleParameters
 						.createOneTime(schedule.getTickCount() + Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay)/1000);
@@ -596,30 +589,32 @@ public class Node implements Comparable<Node>{
 	 * @param pair of responding node and its successors list
 	 */
 	public void processStabResponse(Pair<Node, ArrayList<Node>> stabResponse) {
-		System.out.println("\nTick "+ RunEnvironment.getInstance().getCurrentSchedule().getTickCount() +", Node " +this.id.toString() + 
-				": \n\treceived stabresponse from "+ stabResponse.getFirst().id.toString() + ": " + this.printableNodeList(stabResponse.getSecond()));
-
-		if (stabResponse.getFirst() != null) {
-			ArrayList<Node> updatedSucc = new ArrayList<>();
-			updatedSucc.add(stabResponse.getFirst());		//add the immediate successor
-			
-			boolean done = false;
-			for(int i=0; i < stabResponse.getSecond().size() && !done; i++) { //attach its successors
-				if(!stabResponse.getSecond().get(i).equals(this) && !stabResponse.getSecond().get(i).equals(updatedSucc.get(updatedSucc.size()-1))) {
-					updatedSucc.add(stabResponse.getSecond().get(i));
-				} else {
-					done = true;
+		if(this.subscribed && !this.crashed) {
+			System.out.println("\nTick "+ RunEnvironment.getInstance().getCurrentSchedule().getTickCount() +", Node " +this.id.toString() + 
+					": \n\treceived stabresponse from "+ stabResponse.getFirst().id.toString() + ": " + this.printableNodeList(stabResponse.getSecond()));
+	
+			if (stabResponse.getFirst() != null) {
+				ArrayList<Node> updatedSucc = new ArrayList<>();
+				updatedSucc.add(stabResponse.getFirst());		//add the immediate successor
+				
+				boolean done = false;
+				for(int i=0; i < stabResponse.getSecond().size() && !done; i++) { //attach its successors
+					if(!stabResponse.getSecond().get(i).equals(this) && !stabResponse.getSecond().get(i).equals(updatedSucc.get(updatedSucc.size()-1))) {
+						updatedSucc.add(stabResponse.getSecond().get(i));
+					} else {
+						done = true;
+					}
 				}
+				
+				if(updatedSucc.size() > this.successors_size) { //pop the last one
+					updatedSucc.remove(updatedSucc.size()-1);
+				}	
+				this.successors = updatedSucc;
+				
+				this.fix_data_structures();
+			} else {
+				throw new RuntimeException("Error, impossible stabilization response from inactive node happened!");
 			}
-			
-			if(updatedSucc.size() > this.successors_size) { //pop the last one
-				updatedSucc.remove(updatedSucc.size()-1);
-			}	
-			this.successors = updatedSucc;
-			
-			this.fix_data_structures();
-		} else {
-			throw new RuntimeException("Error, impossible stabilization response from inactive node happened!");
 		}
 	}	
 	
@@ -628,14 +623,22 @@ public class Node implements Comparable<Node>{
 	 * table and of the successors list
 	 */
 	public void fix_data_structures() {
-		//alternate fix_fingers and check_predecessor
+		//alternate fix_fingers and fix_predecessor
 		if (stabphase) {
 			this.fix_fingers();
 		} else {
 			this.fix_successors();
 		}
-		this.check_predecessor();
 		this.stabphase = !this.stabphase;
+		
+		this.check_predecessor();
+		
+		if(!this.initialized) {
+			this.initialized = true;
+			ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
+			ScheduleParameters scheduleParams = ScheduleParameters.createOneTime(schedule.getTickCount()+this.crash_scheduling_interval);
+			schedule.schedule(scheduleParams, this, "nodeCrash");
+		}
 	}
 	
 	/**
