@@ -44,19 +44,29 @@ public class NodeStyle extends DefaultStyleOGL2D {
 	public String getLabel(Object object) {
 		if(object instanceof Node) {
 			Node n = (Node)object;
-			if(n.isSubscribed()) {
-				String label = "Id: "+ (n.getId() < 10 || n.getId() > 99 ? String.valueOf(n.getId())+"  " : String.valueOf(n.getId()));
-				label += "\n\nFinger:";
-				label += n.getFinger().toString();
-				label += "\nSucc: "+(n.getSuccessors().isEmpty() ? "-" : n.getSuccessors().get(0).getId());
-				label += "\nPred: "+(n.getPredecessor() == null ? "-" : n.getPredecessor().getId());
-				return label;
-			} else {
-				return " ";
-			}
+			String label = "Id: "+ (n.getId() < 10 || n.getId() > 99 ? String.valueOf(n.getId())+"  " : String.valueOf(n.getId()));
+			label += "\nFinger:";
+			label += n.getFinger().toString();
+			label += "\nSucc: "+(n.getSuccessors().isEmpty() ? "-" : n.getSuccessors().get(0).getId());
+			label += "\nPred: "+(n.getPredecessor() == null ? "-" : n.getPredecessor().getId());
+				
+			return label;
 		}
 		return null;
 	}
+	
+	@Override
+	public Color getLabelColor(Object object) {
+		if(object instanceof Node) {
+			Node n = (Node)object;
+			if(n.isSubscribed()) {
+				return Color.BLACK;
+			} else {
+				return new Color(0, 0, 0, 1);
+			}
+		}
+	    return null;
+	  }
 
 	@Override
 	public Font getLabelFont(Object object) {
