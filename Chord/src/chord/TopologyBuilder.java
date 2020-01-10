@@ -37,6 +37,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	private HashSet<Integer> keys;
 	private ArrayList<Lookup> lookup_table;
 	private double lookup_interval;
+	private boolean one_key_lookup;
 	private int number_lookup;
 	private int forced_to_leave;
 	private int additional_joins;
@@ -84,6 +85,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		
 		this.lookup_interval = params.getDouble("lookup_interval");
 		this.number_lookup = params.getInteger("number_lookup");
+		this.one_key_lookup = params.getBoolean("one_key_lookup");
 		
 		context.setId("Chord");
 		
@@ -147,8 +149,11 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		
 		double first_schedule = data_gen+this.lookup_interval;
 		ScheduleParameters scheduleParamsLookup= ScheduleParameters.createRepeating(first_schedule, this.lookup_interval);
-		schedule.schedule(scheduleParamsLookup, this, "lookup");
-		
+		if(this.one_key_lookup) {
+			schedule.schedule(scheduleParamsLookup, this, "lookupSingleKey");
+		}else {
+			schedule.schedule(scheduleParamsLookup, this, "lookupMultipleKeys");
+		}
 		// the first batch of join has to be scheduled after the last node insert makes a stabilization and after the data generation, similar the first leave 
 		double first_leave = (one_at_time_init ? init_num_nodes*insertion_delay+(stab_offset+stab_amplitude)+1 : (stab_offset+stab_amplitude)) + leave_interval+1;
 		System.out.println("first leave "+first_leave + "  "+join_interval);
@@ -254,12 +259,26 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		}
 	}
 	
-	public void lookup() {
+	public void lookupMultipleKeys() {
 		int i = 0;
 		while(i < this.number_lookup) {
 			Node rndNode =  (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
 			if(rndNode.isInitialized() && !rndNode.isCrashed()) {
 				int hashKey = (new ArrayList<Integer>(this.keys)).get(this.rnd.nextInt(this.keys.size()));
+				Lookup newLookup = new Lookup(this.lookup_table.size(), rndNode.getId(), this.firstNotCrashed(hashKey), hashKey, RunEnvironment.getInstance().getCurrentSchedule().getTickCount(), this);
+				this.lookup_table.add(newLookup);
+				rndNode.lookup(hashKey, this.lookup_table.size()-1);
+				i++;
+			}
+		}
+	}
+	
+	public void lookupSingleKey() {
+		int i = 0;
+		int hashKey = (new ArrayList<Integer>(this.keys)).get(this.rnd.nextInt(this.keys.size()));
+		while(i < this.number_lookup) {
+			Node rndNode =  (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
+			if(rndNode.isInitialized() && !rndNode.isCrashed()) {
 				Lookup newLookup = new Lookup(this.lookup_table.size(), rndNode.getId(), this.firstNotCrashed(hashKey), hashKey, RunEnvironment.getInstance().getCurrentSchedule().getTickCount(), this);
 				this.lookup_table.add(newLookup);
 				rndNode.lookup(hashKey, this.lookup_table.size()-1);

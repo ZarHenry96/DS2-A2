@@ -6,6 +6,12 @@
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
+				<parameter name="one_key_lookup" displayName="Lookup - one key lookup" type="boolean" 
+						defaultValue="false" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"
+									
+		/>
 				<parameter name="leaving_amplitude" displayName="Leave - amplitude (variable)" type="int" 
 						defaultValue="0" 
 						isReadOnly="false" 
