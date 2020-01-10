@@ -193,7 +193,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		}else {
 			
 			Node succ_node = node;
-			while (succ_node.equals(node)){
+			while (succ_node.equals(node) || succ_node.isCrashed()){
 				succ_node = (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
 			}
 			System.out.println("joining "+node.getId());
@@ -451,17 +451,26 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	}
 	
 	public void debug() {
-		int i = 0;
-		for(Lookup l: this.lookup_table) {
-			if(l.getResult() != null && l.getResult()) {
-				i++;
+		int correct = 0;
+		int wrong = 0;
+		int incomplete = 0;
+		for(Lookup entry: this.lookup_table) {
+			if(entry.isComplete()) {
+				if(entry.getResult()) {
+					correct++;
+				} else {
+					wrong++;
+				}
 			} else {
-				System.out.println(l);
+				incomplete ++;
 			}
 		}
 		
-		System.out.println("################### "+i+":"+this.lookup_table.size());
-		System.out.println("Forced l: "+ this.forced_to_leave);
+		System.out.println("\n--------------------------------------");
+		System.out.println("Correct: "+correct);
+		System.out.println("Wrong: "+wrong);
+		System.out.println("Incomplete: "+incomplete);
+		System.out.println("\nForced leaving: "+ this.forced_to_leave);
 		RunEnvironment.getInstance().pauseRun();
 	}
 	

@@ -73,7 +73,7 @@
 									
 		/>
 				<parameter name="succesors_size" displayName="Init - succesors list size" type="int" 
-						defaultValue="20" 
+						defaultValue="6" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									

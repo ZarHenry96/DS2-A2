@@ -12,6 +12,7 @@ public class Lookup {
 	private Integer nodes_contacted;
 	private Double starting_tick;
 	private Double final_tick;
+	private Boolean completed;
 	private Boolean correctResult;
 	private Boolean resultHasKey;
 	private Boolean responsibleIsCrashed;
@@ -25,7 +26,7 @@ public class Lookup {
 		this.prioriCorrectNode = prioriCorrectNode;
 		this.request_key = request_key;
 		this.top = top;
-		
+		this.completed = false;
 	}
 	
 	public void setResult(Node nodeRes, Integer path_length, Integer nodes_contacted) {
@@ -37,15 +38,20 @@ public class Lookup {
 			this.resultHasKey = nodeRes.getData().containsKey(this.request_key);
 			this.responsibleIsCrashed = nodeRes.isCrashed();
 		} else {
-			this.correctResult = nodeRes.getId() == this.prioriCorrectNode ? true : (top.firstNotCrashed(this.request_key) == nodeRes.getId());
+			this.correctResult = false;
 			this.resultHasKey = false;
 			this.responsibleIsCrashed = false;
 		}
 		this.final_tick = RunEnvironment.getInstance().getCurrentSchedule().getTickCount();
+		this.completed = true;
 	}
 	
 	public Boolean getResult() {
-		return this.correctResult;
+		return this.correctResult || (this.resultHasKey && this.responsibleIsCrashed);
+	}
+	
+	public Boolean isComplete() {
+		return this.completed;
 	}
 	
 	@Override
@@ -56,10 +62,10 @@ public class Lookup {
 		out += ("\nRequired key: " + this.request_key);
 		out += ("\nRequest tick: " + this.starting_tick);
 		out += ("\nPriori node : " + this.prioriCorrectNode);
-		out += ("\nResponsible found: " + this.resultHasKey);
+		out += ("\nResponsible found: " + this.correctResult);
 		out += ("\nResulting node: "+ this.node_res_id);
+		out += ("\nKey was there: " + this.resultHasKey);
 		out += ("\nNode was crashed: " + this.responsibleIsCrashed);
-		out += ("\nIs the first node not crashed and initalised: " + this.correctResult);
 		out += ("\nResponse tick: " + this.final_tick);
 		out += ("\nPath length: " + this.path_length);
 		out += ("\nNodes contacted: " + this.nodes_contacted);

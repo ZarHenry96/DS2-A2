@@ -261,7 +261,7 @@ public class Node implements Comparable<Node>{
 				this.finger.setEntry(1, this.successors.get(0));
 			}
 			
-			if(this.finger.isEmpty()) {
+			if(this.finger.getEntry(1) == null) {
 				return null;
 			} else {
 				return this.closest_preceding_node(id);
@@ -292,7 +292,7 @@ public class Node implements Comparable<Node>{
 					this.viewNet.addEdge(this, last_in_list);
 				}
 				Node prev_successor = last_in_list.getPrevSuccessor(source, id);
-								
+				
 				if(prev_successor == null) {
 					if(prev_contacted_nodes.size() == 1) {
 						System.err.println("Error, no successor available for node "+last_in_list.getId()+"!");
@@ -303,7 +303,14 @@ public class Node implements Comparable<Node>{
 								.createOneTime(schedule.getTickCount() + this.maximum_allowed_delay/1000);
 						schedule.schedule(scheduleParameters, this, "processSuccResponse", new Pair<Node,Boolean>(null, false), dead, prev_contacted_nodes, id, target_dt, position, path_length-1, nodes_contacted+1);
 					}
-				} else {
+				} else if (prev_successor.equals(this)){
+					if(target_dt.equals("lookup")) { 
+						this.removeOutEdges();
+					}
+					this.setResult(this.successors.get(0), target_dt, position, path_length+1, nodes_contacted+2);
+				} else if (last_in_list.equals(this)) {
+					this.find_successor_step(prev_successor, prev_contacted_nodes, id, target_dt, position, path_length, nodes_contacted+1);
+				} else {					
 					double delay_req = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
 					double delay_resp = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
 					double delay_tot = delay_req+delay_resp;
@@ -317,7 +324,7 @@ public class Node implements Comparable<Node>{
 					if(target_dt.equals("lookup")) { 
 						this.removeOutEdges();
 					}
-					this.setResult(response.getFirst(), target_dt, position, path_length+1, nodes_contacted+1);
+					this.setResult(response.getFirst(), target_dt, position, path_length+2, nodes_contacted+2);
 				} else {
 					prev_contacted_nodes.add(source);
 					this.find_successor_step(response.getFirst(), prev_contacted_nodes, id, target_dt, position, path_length+1, nodes_contacted+1);
@@ -339,9 +346,13 @@ public class Node implements Comparable<Node>{
 	private void setResult(Node successor, String target_dt, int position, int path_length, int nodes_contacted) {
 		switch(target_dt) {
 			case "init":
-				this.finger.setEntry(position, successor);
-				this.successors.add(successor);
-				this.stabilization(0);
+				if(!successor.equals(this)) {
+					this.finger.setEntry(position, successor);
+					this.successors.add(successor);
+					this.stabilization(0);
+				} else {
+					this.forcedLeaving();
+				}
 				break;
 			case "finger":
 				if(position == 1) {
@@ -605,23 +616,25 @@ public class Node implements Comparable<Node>{
 					": \n\treceived stabresponse from "+ stabResponse.getFirst().id.toString() + ": " + this.printableNodeList(stabResponse.getSecond()));
 	
 			if (stabResponse.getFirst() != null) {
-				ArrayList<Node> updatedSucc = new ArrayList<>();
-				updatedSucc.add(stabResponse.getFirst());		//add the immediate successor
-				
-				boolean done = false;
-				for(int i=0; i < stabResponse.getSecond().size() && !done; i++) { //attach its successors
-					if(!stabResponse.getSecond().get(i).equals(this) && !stabResponse.getSecond().get(i).equals(updatedSucc.get(updatedSucc.size()-1))) {
-						updatedSucc.add(stabResponse.getSecond().get(i));
-					} else {
-						done = true;
+				if(stabResponse.getFirst().equals(this.successors.get(0))) {
+					ArrayList<Node> updatedSucc = new ArrayList<>();
+					updatedSucc.add(stabResponse.getFirst());		//add the immediate successor
+					
+					boolean done = false;
+					for(int i=0; i < stabResponse.getSecond().size() && !done; i++) { //attach its successors
+						if(!stabResponse.getSecond().get(i).equals(this) && !stabResponse.getSecond().get(i).equals(updatedSucc.get(updatedSucc.size()-1))) {
+							updatedSucc.add(stabResponse.getSecond().get(i));
+						} else {
+							done = true;
+						}
 					}
+					
+					if(updatedSucc.size() > this.successors_size) { //pop the last one
+						updatedSucc.remove(updatedSucc.size()-1);
+					}	
+					this.successors = updatedSucc;
 				}
-				
-				if(updatedSucc.size() > this.successors_size) { //pop the last one
-					updatedSucc.remove(updatedSucc.size()-1);
-				}	
-				this.successors = updatedSucc;
-				
+					
 				this.fix_data_structures();
 			} else {
 				throw new RuntimeException("Error, impossible stabilization response from inactive node happened!");
