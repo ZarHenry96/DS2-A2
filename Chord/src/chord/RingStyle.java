@@ -29,7 +29,7 @@ public class RingStyle extends DefaultStyleOGL2D {
 	
 	@Override
 	public Color getBorderColor(Object object) {
-	    return Color.RED;
+	    return Color.BLUE;
 	}
 	
 	@Override

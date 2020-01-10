@@ -2,12 +2,14 @@ package chord;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Random;
 
 import repast.simphony.engine.environment.RunEnvironment;
 import repast.simphony.engine.schedule.ISchedule;
 import repast.simphony.engine.schedule.ScheduleParameters;
 import repast.simphony.space.graph.Network;
+import repast.simphony.space.graph.RepastEdge;
 import repast.simphony.util.ContextUtils;
 import repast.simphony.util.collections.Pair;
 
@@ -207,8 +209,12 @@ public class Node implements Comparable<Node>{
 	 * @param nodes_contacted number of nodes contacted
 	 */
 	public void find_successor_step(Node target_node, ArrayList<Node> prev_contacted_nodes, int id, String target_dt, int position, int path_length, int nodes_contacted) {
-
 		System.out.println("step "+this.id+ " -> "+target_node.getId()+" "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
+		
+		if(target_dt.equals("lookup")) { 
+			this.removeOutEdges();
+			this.viewNet.addEdge(this, target_node);
+		}
 		
 		Pair<Node, Boolean> return_value = target_node.processSuccRequest(id);
 		
@@ -281,8 +287,12 @@ public class Node implements Comparable<Node>{
 		if(this.subscribed && !this.crashed) {
 			if(response.getFirst() == null) {
 				Node last_in_list = prev_contacted_nodes.get(prev_contacted_nodes.size()-1);
+				if(target_dt.equals("lookup")) { 
+					this.removeOutEdges();
+					this.viewNet.addEdge(this, last_in_list);
+				}
 				Node prev_successor = last_in_list.getPrevSuccessor(source, id);
-				
+								
 				if(prev_successor == null) {
 					if(prev_contacted_nodes.size() == 1) {
 						System.err.println("Error, no successor available for node "+last_in_list.getId()+"!");
@@ -304,12 +314,17 @@ public class Node implements Comparable<Node>{
 				}
 			} else {
 				if(response.getSecond()) {
+					if(target_dt.equals("lookup")) { 
+						this.removeOutEdges();
+					}
 					this.setResult(response.getFirst(), target_dt, position, path_length+1, nodes_contacted+1);
 				} else {
 					prev_contacted_nodes.add(source);
 					this.find_successor_step(response.getFirst(), prev_contacted_nodes, id, target_dt, position, path_length+1, nodes_contacted+1);
 				}
 			}
+		} else {
+			this.removeOutEdges();
 		}
 	}
 	
@@ -721,6 +736,7 @@ public class Node implements Comparable<Node>{
 			ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 			if(this.initialized && this.rnd.nextDouble() < this.crash_pr) {
 				this.crashed = true;
+				this.removeOutEdges();
 				System.out.println("\nTick "+ RunEnvironment.getInstance().getCurrentSchedule().getTickCount() +", Node " +this.id.toString() + " is crashed");
 				ScheduleParameters scheduleParams = ScheduleParameters.createOneTime(schedule.getTickCount()+this.recovery_interval);
 				schedule.schedule(scheduleParams, this, "recovery");
@@ -847,6 +863,8 @@ public class Node implements Comparable<Node>{
 		
 		this.stabphase = true;
 		this.data.clear();
+		
+		this.removeOutEdges();
 	}
 	
 	/**
@@ -899,6 +917,17 @@ public class Node implements Comparable<Node>{
 	}
 	
 	/**
+	 * Removes the outgoing edges
+	 */
+	public void removeOutEdges() {
+		Iterator<RepastEdge<Object>> iterator = this.viewNet.getOutEdges(this).iterator();
+		while(iterator.hasNext()) {
+			RepastEdge<Object> edge = iterator.next();
+			this.viewNet.removeEdge(edge);
+		}
+	}
+	
+	/**
 	 * Returns the hash size that the ids are based on
 	 * @return the hash size that the ids are based on
 	 */
@@ -947,6 +976,13 @@ public class Node implements Comparable<Node>{
 	}
 	
 	/**
+	 * Returns if the current node is subscribed to the ring
+	 * @return true if it is subscribed, false otherwise
+	 */
+	public boolean isSubscribed() {
+		return this.subscribed;
+	}
+	/**
 	 * Returns the data managed by the current node
 	 * @return the data managed by the current node
 	 */
@@ -954,6 +990,22 @@ public class Node implements Comparable<Node>{
 		return this.data;
 	}
 
+	/**
+	 * Returns the finger table of the current node
+	 * @return the finger table of the current node
+	 */
+	public FingerTable getFinger() {
+		return this.finger;
+	}
+	
+	/**
+	 * Returns the successors list of the current node
+	 * @return the successors list of the current node
+	 */
+	public ArrayList<Node> getSuccessors() {
+		return this.successors;
+	}
+	
 	/**
 	 * Debug function printing all node information
 	 */

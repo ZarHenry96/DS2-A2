@@ -421,13 +421,13 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 			}
 		}
 		System.out.println("\nLeaving node "+node.getId()+"  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount() );
-		context.remove(node);
+		//context.remove(node);
 		this.active_nodes.remove(node);
 	}
 	
 	public void forced_to_leave(Context<Object> context, Node node) {
 		this.active_nodes.remove(node);
-		context.remove(node);
+		//context.remove(node);
 		this.forced_to_leave++;
 		this.additional_joins++;
 	}

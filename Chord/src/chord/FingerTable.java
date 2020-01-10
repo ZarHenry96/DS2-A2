@@ -69,9 +69,8 @@ public class FingerTable {
 	public String toString() {
 		String out = "";
 		
-		ArrayList<Integer> keys = this.getKeys(false);
-		for(int key: keys) {
-			out += "\n\t"+key+"\t"+this.table.get(key).getId();
+		for(int i=1; i<=this.size; i++) {
+			out += "\n"+i+"  "+(this.table.get(i) == null ? "-" : this.table.get(i).getId());
 		}
 		
 		return out;
