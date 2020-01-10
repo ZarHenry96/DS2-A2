@@ -260,30 +260,46 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	}
 	
 	public void lookupMultipleKeys() {
-		int i = 0;
-		while(i < this.number_lookup) {
-			Node rndNode =  (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
-			if(rndNode.isInitialized() && !rndNode.isCrashed()) {
-				int hashKey = (new ArrayList<Integer>(this.keys)).get(this.rnd.nextInt(this.keys.size()));
-				Lookup newLookup = new Lookup(this.lookup_table.size(), rndNode.getId(), this.firstNotCrashed(hashKey), hashKey, RunEnvironment.getInstance().getCurrentSchedule().getTickCount(), this);
-				this.lookup_table.add(newLookup);
-				rndNode.lookup(hashKey, this.lookup_table.size()-1);
-				i++;
+		
+		HashSet<Node> lookupingNodes = new HashSet<>();
+		
+		if (this.number_lookup >= this.active_nodes.size()) {
+			lookupingNodes.addAll(this.active_nodes);
+		}else {
+			while(lookupingNodes.size() != this.number_lookup) {
+				Node rndNode =  (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
+				if(rndNode.isInitialized() && !rndNode.isCrashed() && !lookupingNodes.contains(rndNode) ) {
+					lookupingNodes.add(rndNode);
+				}
 			}
+		}
+		
+		for(Node node: lookupingNodes) {
+			int hashKey = (new ArrayList<Integer>(this.keys)).get(this.rnd.nextInt(this.keys.size()));
+			Lookup newLookup = new Lookup(this.lookup_table.size(), node.getId(), this.firstNotCrashed(hashKey), hashKey, RunEnvironment.getInstance().getCurrentSchedule().getTickCount(), this);
+			this.lookup_table.add(newLookup);
+			node.lookup(hashKey, this.lookup_table.size()-1);			
 		}
 	}
 	
 	public void lookupSingleKey() {
-		int i = 0;
 		int hashKey = (new ArrayList<Integer>(this.keys)).get(this.rnd.nextInt(this.keys.size()));
-		while(i < this.number_lookup) {
-			Node rndNode =  (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
-			if(rndNode.isInitialized() && !rndNode.isCrashed()) {
-				Lookup newLookup = new Lookup(this.lookup_table.size(), rndNode.getId(), this.firstNotCrashed(hashKey), hashKey, RunEnvironment.getInstance().getCurrentSchedule().getTickCount(), this);
-				this.lookup_table.add(newLookup);
-				rndNode.lookup(hashKey, this.lookup_table.size()-1);
-				i++;
+		HashSet<Node> lookupingNodes = new HashSet<>();
+		if (this.number_lookup >= this.active_nodes.size()) {
+			lookupingNodes.addAll(this.active_nodes);
+		}else {
+			while(lookupingNodes.size() != this.number_lookup) {
+				Node rndNode =  (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
+				if(rndNode.isInitialized() && !rndNode.isCrashed() && !lookupingNodes.contains(rndNode) ) {
+					lookupingNodes.add(rndNode);
+				}
 			}
+		}
+		
+		for(Node node: lookupingNodes) {
+			Lookup newLookup = new Lookup(this.lookup_table.size(), node.getId(), this.firstNotCrashed(hashKey), hashKey, RunEnvironment.getInstance().getCurrentSchedule().getTickCount(), this);
+			this.lookup_table.add(newLookup);
+			node.lookup(hashKey, this.lookup_table.size()-1);			
 		}
 	}
 	
