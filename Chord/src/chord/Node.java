@@ -414,8 +414,10 @@ public class Node implements Comparable<Node>{
 					while(this.successors.size() > this.successors_size) {
 						this.successors.remove(this.successors.size()-1);
 					}
-				} else {
+				} else if(!this.successors.isEmpty()) {
 					this.last_stabilized_succ = this.successors.get(0);
+				} else {
+					this.last_stabilized_succ = null;
 				}
 				break;
 			case "lookup":
