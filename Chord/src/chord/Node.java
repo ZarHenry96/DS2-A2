@@ -126,7 +126,7 @@ public class Node implements Comparable<Node>{
 		this.resetPredecessor();
 		ArrayList<Node> prev_contacted_nodes = new ArrayList<>();
 		prev_contacted_nodes.add(this);
-		this.find_successor_step(node, prev_contacted_nodes, this.id, "init", 1, 0, 0);
+		this.find_successor_step(node, prev_contacted_nodes, this.id, "init", 1, 0, 0, 0);
 		
 		this.subscribed = true;
 	}
@@ -190,11 +190,11 @@ public class Node implements Comparable<Node>{
 	 */
 	public void find_successor(int id, String target_dt, int position) {
 		if(Utils.belongsToInterval(id, this.id, this.successors.get(0).getId())) {
-			setResult(this.successors.get(0), target_dt, position, 1, 1);
+			setResult(this.successors.get(0), target_dt, position, 1, 0, 1);
 		} else {
 			ArrayList<Node> prev_contacted_nodes = new ArrayList<>();
 			prev_contacted_nodes.add(this);
-			this.find_successor_step(this.closest_preceding_node(id), prev_contacted_nodes, id, target_dt, position, 0, 0);
+			this.find_successor_step(this.closest_preceding_node(id), prev_contacted_nodes, id, target_dt, position, 0, 0, 0);
 		}
 	}
 	
@@ -208,7 +208,7 @@ public class Node implements Comparable<Node>{
 	 * @param path_length length of the query path
 	 * @param nodes_contacted number of nodes contacted
 	 */
-	public void find_successor_step(Node target_node, ArrayList<Node> prev_contacted_nodes, int id, String target_dt, int position, int path_length, int nodes_contacted) {
+	public void find_successor_step(Node target_node, ArrayList<Node> prev_contacted_nodes, int id, String target_dt, int position, int path_length, int num_timeouts, int nodes_contacted) {
 		System.out.println("step "+this.id+ " -> "+target_node.getId()+" "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
 		
 		if(target_dt.equals("lookup")) { 
@@ -225,7 +225,7 @@ public class Node implements Comparable<Node>{
 		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 		ScheduleParameters scheduleParameters = ScheduleParameters
 				.createOneTime(schedule.getTickCount() + delay_tot/1000);
-		schedule.schedule(scheduleParameters, this, "processSuccResponse", return_value, target_node, prev_contacted_nodes, id, target_dt, position, path_length, nodes_contacted);
+		schedule.schedule(scheduleParameters, this, "processSuccResponse", return_value, target_node, prev_contacted_nodes, id, target_dt, position, path_length, num_timeouts, nodes_contacted);
 	}
 	
 	/**
@@ -282,7 +282,7 @@ public class Node implements Comparable<Node>{
 	 * @param path_length length of the query path
 	 * @param nodes_contacted number of nodes contacted
 	 */
-	public void processSuccResponse(Pair<Node, Boolean> response, Node source, ArrayList<Node> prev_contacted_nodes, int id, String target_dt, int position, int path_length, int nodes_contacted) {
+	public void processSuccResponse(Pair<Node, Boolean> response, Node source, ArrayList<Node> prev_contacted_nodes, int id, String target_dt, int position, int path_length, int num_timeouts, int nodes_contacted) {
 		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 		if(this.subscribed && !this.crashed) {
 			if(response.getFirst() == null) {
@@ -296,20 +296,20 @@ public class Node implements Comparable<Node>{
 				if(prev_successor == null) {
 					if(prev_contacted_nodes.size() == 1) {
 						System.err.println("Error, no successor available for node "+last_in_list.getId()+"!");
-						setResult(this, target_dt, position, -1, -1);
+						setResult(this, target_dt, position, -1, -1, -1);
 					} else {
 						Node dead = prev_contacted_nodes.remove(prev_contacted_nodes.size()-1);
 						ScheduleParameters scheduleParameters = ScheduleParameters
 								.createOneTime(schedule.getTickCount() + this.maximum_allowed_delay/1000);
-						schedule.schedule(scheduleParameters, this, "processSuccResponse", new Pair<Node,Boolean>(null, false), dead, prev_contacted_nodes, id, target_dt, position, path_length-1, nodes_contacted+1);
+						schedule.schedule(scheduleParameters, this, "processSuccResponse", new Pair<Node,Boolean>(null, false), dead, prev_contacted_nodes, id, target_dt, position, path_length-1, num_timeouts+1, nodes_contacted+1);
 					}
 				} else if (prev_successor.equals(this)){
 					if(target_dt.equals("lookup")) { 
 						this.removeOutEdges();
 					}
-					this.setResult(this.successors.get(0), target_dt, position, path_length+1, nodes_contacted+2);
+					this.setResult(this.successors.get(0), target_dt, position, path_length+1, num_timeouts+1, nodes_contacted+2);
 				} else if (last_in_list.equals(this)) {
-					this.find_successor_step(prev_successor, prev_contacted_nodes, id, target_dt, position, path_length, nodes_contacted+1);
+					this.find_successor_step(prev_successor, prev_contacted_nodes, id, target_dt, position, path_length, num_timeouts+1, nodes_contacted+1);
 				} else {					
 					double delay_req = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
 					double delay_resp = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
@@ -317,17 +317,17 @@ public class Node implements Comparable<Node>{
 					
 					ScheduleParameters scheduleParameters = ScheduleParameters
 							.createOneTime(schedule.getTickCount() + delay_tot/1000);
-					schedule.schedule(scheduleParameters, this, "find_successor_step", prev_successor, prev_contacted_nodes, id, target_dt, position, path_length, nodes_contacted+2);
+					schedule.schedule(scheduleParameters, this, "find_successor_step", prev_successor, prev_contacted_nodes, id, target_dt, position, path_length, num_timeouts+1, nodes_contacted+2);
 				}
 			} else {
 				if(response.getSecond()) {
 					if(target_dt.equals("lookup")) { 
 						this.removeOutEdges();
 					}
-					this.setResult(response.getFirst(), target_dt, position, path_length+2, nodes_contacted+2);
+					this.setResult(response.getFirst(), target_dt, position, path_length+2, num_timeouts, nodes_contacted+2);
 				} else {
 					prev_contacted_nodes.add(source);
-					this.find_successor_step(response.getFirst(), prev_contacted_nodes, id, target_dt, position, path_length+1, nodes_contacted+1);
+					this.find_successor_step(response.getFirst(), prev_contacted_nodes, id, target_dt, position, path_length+1, num_timeouts, nodes_contacted+1);
 				}
 			}
 		} else {
@@ -343,7 +343,7 @@ public class Node implements Comparable<Node>{
 	 * @param path_length length of the query path
 	 * @param nodes_contacted number of nodes contacted
 	 */
-	private void setResult(Node successor, String target_dt, int position, int path_length, int nodes_contacted) {
+	private void setResult(Node successor, String target_dt, int position, int path_length, int num_timeouts, int nodes_contacted) {
 		switch(target_dt) {
 			case "init":
 				if(!successor.equals(this)) {
@@ -411,6 +411,9 @@ public class Node implements Comparable<Node>{
 							}
 						}
 					}
+					while(this.successors.size() > this.successors_size) {
+						this.successors.remove(this.successors.size()-1);
+					}
 				} else {
 					this.last_stabilized_succ = this.successors.get(0);
 				}
@@ -419,7 +422,7 @@ public class Node implements Comparable<Node>{
 				ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 				ScheduleParameters scheduleParameters = ScheduleParameters
 						.createOneTime(schedule.getTickCount() + Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay)/1000);
-				schedule.schedule(scheduleParameters, this.lookup_table.get(position), "setResult", successor, path_length, nodes_contacted);
+				schedule.schedule(scheduleParameters, this.lookup_table.get(position), "setResult", successor, path_length, num_timeouts, nodes_contacted);
 		}
 	}
 	
@@ -489,7 +492,7 @@ public class Node implements Comparable<Node>{
 			if (predecessorOfSuccessor!=null && Utils.belongsToInterval(predecessorOfSuccessor.getId(), this.id, this.successors.get(0).getId()) && predecessorOfSuccessor.getId() != this.successors.get(0).getId()){
 				this.successors.add(0,predecessorOfSuccessor);
 				this.successors.remove(this);
-				if(this.successors.size() > this.successors_size) {
+				while(this.successors.size() > this.successors_size) {
 					this.successors.remove(this.successors.size()-1);
 				}
 			}
@@ -598,7 +601,7 @@ public class Node implements Comparable<Node>{
 					}
 				} else {
 					this.successors.add(0, successor);
-					if(this.successors.size() == this.successors_size) {
+					while(this.successors.size() > this.successors_size) {
 						this.successors.remove(this.successors_size-1);
 					}
 				}
@@ -850,6 +853,9 @@ public class Node implements Comparable<Node>{
 				} else {
 					this.successors.add(lastSuccessor);
 				}
+				while(this.successors.size() > this.successors_size) {
+					this.successors.remove(this.successors.size()-1);
+				}
 			}
 			
 			if(this.successors.isEmpty()) {
@@ -923,7 +929,7 @@ public class Node implements Comparable<Node>{
 	 */
 	public void lookup(int key, int position) {
 		if(this.id == key) {
-			this.setResult(this, "lookup", position, 0, 0);
+			this.setResult(this, "lookup", position, 0, 0, 0);
 		} else {
 			this.find_successor(key, "lookup", position);
 		}
@@ -1002,7 +1008,33 @@ public class Node implements Comparable<Node>{
 	public HashMap<Integer, String> getData() {
 		return this.data;
 	}
+	
+	/**
+	 * Returns the size of the data managed by the current node
+	 * @return the size of the data managed by the current node
+	 */
+	public Integer getDataSize() {
+		return this.data.size();
+	}
+	
+	/**
+	 * Returns a string containing the missing successors and the wrong ones
+	 * @return the missing and the wrong successors in string format
+	 */
+	public String getMissingWrongSuccessors() {
+		Pair<ArrayList<Integer>,ArrayList<Integer>> data = this.top.missingWrongSuccessors(this, this.successors, this.hash_size, this.successors_size);
+		return "("+data.getFirst().toString()+","+data.getSecond().toString()+")";
+	}
 
+	/**
+	 * Returns a string containing the number of missing successors and wrong ones
+	 * @return the number of missing successors and wrong ones in string format
+	 */
+	public String getMissingWrongSuccessorsNum() {
+		Pair<ArrayList<Integer>,ArrayList<Integer>> data = this.top.missingWrongSuccessors(this, this.successors, this.hash_size, this.successors_size);
+		return "("+data.getFirst().size()+","+data.getSecond().size()+")";
+	}
+	
 	/**
 	 * Returns the finger table of the current node
 	 * @return the finger table of the current node

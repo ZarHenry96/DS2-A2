@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <parameters>
 					<parameter name="data_size" displayName="Data - value size (# of characters)" type="int" 
-						defaultValue="10" 
+						defaultValue="150" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
@@ -19,7 +19,7 @@
 									
 		/>
 				<parameter name="min_number_leaving" displayName="Leave - minimum # of nodes" type="int" 
-						defaultValue="2" 
+						defaultValue="10" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
@@ -37,19 +37,19 @@
 									
 		/>
 				<parameter name="recovery_interval" displayName="Crash - recovery interval" type="double" 
-						defaultValue="10.0" 
+						defaultValue="5.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
 		/>
 				<parameter name="m" displayName="Init - hash size" type="int" 
-						defaultValue="5" 
+						defaultValue="11" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
 				<parameter name="one_at_time_init" displayName="Init - initialise the ring one node at a time" type="boolean" 
-						defaultValue="true" 
+						defaultValue="false" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"
 									
@@ -61,31 +61,31 @@
 									
 		/>
 				<parameter name="join_interval" displayName="Join - # of ticks between leaves and joins" type="double" 
-						defaultValue="40.0" 
+						defaultValue="20.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
 		/>
 				<parameter name="init_num_nodes" displayName="Init - initial number of nodes" type="int" 
-						defaultValue="15" 
+						defaultValue="800" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
 				<parameter name="succesors_size" displayName="Init - succesors list size" type="int" 
-						defaultValue="6" 
+						defaultValue="12" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
 				<parameter name="leave_interval" displayName="Leave - # of ticks between different leaves" type="double" 
-						defaultValue="100.0" 
+						defaultValue="50.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
 		/>
 				<parameter name="total_number_data" displayName="Data - number of keys" type="int" 
-						defaultValue="20" 
+						defaultValue="1000" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
@@ -103,7 +103,7 @@
 									
 		/>
 				<parameter name="min_number_joins" displayName="Join - minimum # of nodes" type="int" 
-						defaultValue="2" 
+						defaultValue="10" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
@@ -115,25 +115,25 @@
 									
 		/>
 				<parameter name="stab_offset" displayName="Stabilization - offset (minimum # of ticks)" type="double" 
-						defaultValue="3.0" 
+						defaultValue="10.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
 		/>
 				<parameter name="number_lookup" displayName="Lookup - number of lookups per batch" type="int" 
-						defaultValue="15" 
+						defaultValue="200" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
 				<parameter name="lookup_interval" displayName="Lookup - # of ticks between lookup batches" type="double" 
-						defaultValue="15.0" 
+						defaultValue="100.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
 		/>
 				<parameter name="key_size" displayName="Data - key size (# of characters)" type="int" 
-						defaultValue="5" 
+						defaultValue="100" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									

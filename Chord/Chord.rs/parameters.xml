@@ -61,13 +61,13 @@
 									
 		/>
 				<parameter name="join_interval" displayName="Join - # of ticks between leaves and joins" type="double" 
-						defaultValue="40.0" 
+						defaultValue="20.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
 		/>
 				<parameter name="init_num_nodes" displayName="Init - initial number of nodes" type="int" 
-						defaultValue="20" 
+						defaultValue="15" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
@@ -79,7 +79,7 @@
 									
 		/>
 				<parameter name="leave_interval" displayName="Leave - # of ticks between different leaves" type="double" 
-						defaultValue="100.0" 
+						defaultValue="50.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
@@ -115,7 +115,7 @@
 									
 		/>
 				<parameter name="stab_offset" displayName="Stabilization - offset (minimum # of ticks)" type="double" 
-						defaultValue="3.0" 
+						defaultValue="5.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
@@ -127,7 +127,7 @@
 									
 		/>
 				<parameter name="lookup_interval" displayName="Lookup - # of ticks between lookup batches" type="double" 
-						defaultValue="15.0" 
+						defaultValue="100.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									

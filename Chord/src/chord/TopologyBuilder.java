@@ -20,6 +20,7 @@ import repast.simphony.parameter.Parameters;
 import repast.simphony.space.continuous.ContinuousSpace;
 import repast.simphony.space.continuous.RandomCartesianAdder;
 import repast.simphony.space.graph.Network;
+import repast.simphony.util.collections.Pair;
 import repast.simphony.engine.schedule.ISchedule;
 import repast.simphony.engine.schedule.ScheduleParameters;
 /**
@@ -163,7 +164,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 
 		schedule.schedule(scheduleParamsleave, this, "leaving_nodes", context, space, join_interval);
 		
-		ScheduleParameters scheduleParamsDebug = ScheduleParameters.createOneTime(60000);
+		ScheduleParameters scheduleParamsDebug = ScheduleParameters.createOneTime(10000);
 		schedule.schedule(scheduleParamsDebug, this, "debug");
 		
 		return context;
@@ -189,9 +190,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		space.moveTo(node, node.getX(), node.getY());
 		if (this.active_nodes.size() == 1) {
 			node.create();
-			
 		}else {
-			
 			Node succ_node = node;
 			while (succ_node.equals(node) || succ_node.isCrashed()){
 				succ_node = (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
@@ -259,8 +258,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		}
 	}
 	
-	public void lookupMultipleKeys() {
-		
+	public void lookupMultipleKeys() {	
 		HashSet<Node> lookupingNodes = new HashSet<>();
 		
 		if (this.number_lookup >= this.active_nodes.size()) {
@@ -276,7 +274,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		
 		for(Node node: lookupingNodes) {
 			int hashKey = (new ArrayList<Integer>(this.keys)).get(this.rnd.nextInt(this.keys.size()));
-			Lookup newLookup = new Lookup(this.lookup_table.size(), node.getId(), this.firstNotCrashed(hashKey), hashKey, RunEnvironment.getInstance().getCurrentSchedule().getTickCount(), this);
+			Lookup newLookup = new Lookup(this.lookup_table.size(), hashKey, node.getId(), RunEnvironment.getInstance().getCurrentSchedule().getTickCount(), this.firstNotCrashed(hashKey), this);
 			this.lookup_table.add(newLookup);
 			node.lookup(hashKey, this.lookup_table.size()-1);			
 		}
@@ -297,37 +295,47 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		}
 		
 		for(Node node: lookupingNodes) {
-			Lookup newLookup = new Lookup(this.lookup_table.size(), node.getId(), this.firstNotCrashed(hashKey), hashKey, RunEnvironment.getInstance().getCurrentSchedule().getTickCount(), this);
+			Lookup newLookup = new Lookup(this.lookup_table.size(), hashKey, node.getId(), RunEnvironment.getInstance().getCurrentSchedule().getTickCount(), this.firstNotCrashed(hashKey), this);
 			this.lookup_table.add(newLookup);
 			node.lookup(hashKey, this.lookup_table.size()-1);			
 		}
 	}
 	
+	public String getLookupsResults() {
+		String results = "complete,duration,node_found,node_has_key,node_is_crashed,path_length,timeouts,nodes_contacted\n";
+		for(Lookup entry: this.lookup_table) {
+			results += entry.toCSV();
+		}
+		return results;
+	}
+	
 	public Integer firstNotCrashed(Integer key) {
-		boolean find = false;
+		boolean found = false;
 		Node correctNode = null;
 		Iterator<Node> it = this.active_nodes.iterator();
-		while(it.hasNext() && !find) {
+		while(it.hasNext() && !found) {
 			Node node = it.next();
 			if(!node.isCrashed() && node.isInitialized() && node.getId() >= key) {
-				find = true;
+				found = true;
 				correctNode = node;
 				
 			}
 		}
-		if(!find) {
+		if(!found) {
 			it = this.active_nodes.iterator();
-			while(it.hasNext() && !find) {
+			while(it.hasNext() && !found) {
 				Node node = it.next();
 				if(!node.isCrashed() && node.isInitialized() && node.getId() < key) {
-					find = true;
-					correctNode = node;
-					
+					found = true;
+					correctNode = node;			
 				}
 			}
 		}
-		
-		return correctNode.getId();
+		if(!found) {
+			return null;
+		} else {
+			return correctNode.getId();
+		}
 	}
 	
 	/**
@@ -441,6 +449,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	}
 	
 	public void forced_to_leave(Context<Object> context, Node node) {
+		System.out.println("\nForced leaving node "+node.getId()+"  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
 		this.active_nodes.remove(node);
 		this.forced_to_leave++;
 		this.additional_joins++;
@@ -448,6 +457,64 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	
 	public int getForcedToLeave() {
 		return this.forced_to_leave;
+	}
+	
+	/**
+	 * Returns a pair of lists containing the missing successors and the wrong ones w.r.t. the ones provided
+	 * @param node the node of interest
+	 * @param successors the successors list of the node of interest
+	 * @param hashSize the hash size
+	 * @param max_succ_size the maximum size of the successors list
+	 * @return a Pair<ArrayList<Integer>,ArrayList<Integer>> containing the missing successors and the wrong ones w.r.t. the ones provided
+	 */
+	public Pair<ArrayList<Integer>,ArrayList<Integer>> missingWrongSuccessors(Node node, ArrayList<Node> successors, Integer hashSize, Integer max_succ_size){
+		ArrayList<Integer> rightSucc = new ArrayList<>();
+		
+		boolean end = false;
+		Integer lastId = node.getId();
+		while(rightSucc.size() < max_succ_size && !end) {
+			Integer succId = this.firstNotCrashed((lastId+1) % (int)Math.pow(2, hashSize));
+			if(succId != null && succId != node.getId() && !rightSucc.contains(succId)) {
+				rightSucc.add(succId);
+				lastId = succId;
+			} else {
+				end = true;
+			}
+		}
+		if(rightSucc.isEmpty()) {
+			rightSucc.add(lastId);
+		}
+
+		ArrayList<Integer> missingSucc = new ArrayList<>();
+		ArrayList<Integer> wrongSucc = new ArrayList<>();
+		
+		int i=0;
+		int j=0;
+		while(i<successors.size()) {
+			Node succ = successors.get(i);
+			Integer succId = succ.getId();
+			
+			if(j < rightSucc.size()) {
+				Integer rightSuccId = rightSucc.get(j);
+				if(succId.equals(rightSuccId)) {
+					i++;
+					j++;
+				} else if(rightSucc.contains(succId)) {
+					missingSucc.add(rightSuccId);
+					j++;
+				} else {
+					wrongSucc.add(succId);
+					i++;
+				}
+			} else if (!succ.isSubscribed() || !succ.isInitialized() || succ.isCrashed()) {
+				wrongSucc.add(succId);
+				i++;
+			} else {
+				i++;
+			}
+		}
+		
+		return new Pair<ArrayList<Integer>,ArrayList<Integer>>(missingSucc,wrongSucc);
 	}
 	
 	public void debug() {
