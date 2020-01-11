@@ -20,7 +20,7 @@
 \begin{document}
 	
 	%%%%%%%%% TITLE
-	\title{Chord}
+	\title{Chord: A Scalable Peer-to-peer Lookup Protocol for Internet Applications}
 	
 	\author{Alessandro Cacco\\
 		mat. 203345\\
@@ -37,6 +37,20 @@
 	\date{}
 	\maketitle
 	
+	\section{Introduction}
+	\label{sec:intro}
+	This work aims at illustrating an implementation of \textit{Chord}, a scalable distributed lookup protocol described in \cite{chord}. Basically, \textit{Chord} provides a primitive, i.e. \textit{lookup}, that allows to determine the responsible of a key in an efficient way. Hence, it represents a great solution to the data location problem: each data item needs just to be associated to a key and stored in the node the key maps to. \newline 
+	Moreover, \textit{Chord} exploits consistent hashing to assign keys to nodes - in order to keep the load balanced - and requires that each node maintains information about only a few other nodes. Therefore, it scales well to large numbers of nodes  without affecting performance. Actually, \textit{Chord} adapts effectively also in dynamic environments with frequent joins and leaves thanks to a simple stabilization algorithm. \newline
+	Starting from this, \cref{sec:implementation} will describe in detail the implementation, \cref{sec:simulator} will present the graphical simulator that has been developed to show the protocol's functioning and \cref{sec:analyses} will describe the simulations that have been performed and the results obtained. 
+	
+	\section{Implementation}
+	\label{sec:implementation}
+	
+	\section{Simulator}
+	\label{sec:simulator}
+	
+	\section{Analyses and Results}
+	\label{sec:analyses}
 	
 	\printbibliography
 \end{document}
