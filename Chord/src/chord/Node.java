@@ -422,7 +422,7 @@ public class Node implements Comparable<Node>{
 				ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 				ScheduleParameters scheduleParameters = ScheduleParameters
 						.createOneTime(schedule.getTickCount() + Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay)/1000);
-				schedule.schedule(scheduleParameters, this.lookup_table.get(position), "setResult", successor, path_length, num_timeouts, nodes_contacted);
+				schedule.schedule(scheduleParameters, this.lookup_table.get(position), "setResult", successor, path_length, num_timeouts, nodes_contacted, Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay)/1000);
 		}
 	}
 	

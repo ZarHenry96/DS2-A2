@@ -127,7 +127,7 @@
 									
 		/>
 				<parameter name="lookup_interval" displayName="Lookup - # of ticks between lookup batches" type="double" 
-						defaultValue="100.0" 
+						defaultValue="50.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									

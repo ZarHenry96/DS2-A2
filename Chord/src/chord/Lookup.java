@@ -29,13 +29,13 @@ public class Lookup {
 		this.completed = false;
 	}
 	
-	public void setResult(Node nodeRes, Integer path_length, Integer num_timeouts, Integer nodes_contacted) {
+	public void setResult(Node nodeRes, Integer path_length, Integer num_timeouts, Integer nodes_contacted, Double delay_response) {
 		this.completed = true;
 		this.node_res_id = nodeRes.getId();	
 		this.path_length = path_length;
 		this.num_timeouts = num_timeouts;
 		this.nodes_contacted = nodes_contacted;
-		this.final_tick = RunEnvironment.getInstance().getCurrentSchedule().getTickCount();
+		this.final_tick = RunEnvironment.getInstance().getCurrentSchedule().getTickCount() + delay_response;
 		if(this.path_length != -1 && this.nodes_contacted != -1 ) {
 			this.correctResult = nodeRes.getId() == this.prioriCorrectNode ? true : (top.firstNotCrashed(this.request_key) == nodeRes.getId());
 			this.resultHasKey = nodeRes.getData().containsKey(this.request_key);
