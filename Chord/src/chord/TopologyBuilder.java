@@ -1,6 +1,11 @@
 package chord;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -28,6 +33,7 @@ import repast.simphony.engine.schedule.ScheduleParameters;
  */
 public class TopologyBuilder implements ContextBuilder<Object> {
 
+	private final double end = 5000;
 	private Random rnd;
 	private ArrayList<Node> all_nodes;
 	private TreeSet<Node> active_nodes;
@@ -166,6 +172,9 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		
 		ScheduleParameters scheduleParamsDebug = ScheduleParameters.createOneTime(10000);
 		schedule.schedule(scheduleParamsDebug, this, "debug");
+
+		ScheduleParameters scheduleLookup= ScheduleParameters.createOneTime(end);
+		schedule.schedule(scheduleLookup, this, "getLookupsResults");
 		
 		return context;
 	}
@@ -195,9 +204,9 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 			while (succ_node.equals(node) || succ_node.isCrashed()){
 				succ_node = (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
 			}
-			System.out.println("joining "+node.getId());
-			System.out.println("joining with "+succ_node.getId());
-			System.out.println(this.active_nodes.size());
+			//System.out.println("joining "+node.getId());
+			//System.out.println("joining with "+succ_node.getId());
+			//System.out.println(this.active_nodes.size());
 			node.join(succ_node);
 		}
 		
@@ -235,7 +244,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	public void data_generation(int m, int key_size, int data_size, int total_number_data) {
 		while(this.keys.size() != total_number_data) {
 			String data = RandomStringUtils.randomAlphabetic(data_size);
-			System.out.println(data);
+			//System.out.println(data);
 			String key = data.substring(0, key_size);
 			Integer hashKey = Utils.getHash(key, m);
 			if(! this.keys.contains(hashKey)) {
@@ -317,12 +326,30 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		}
 	}
 	
-	public String getLookupsResults() {
+	public void getLookupsResults() {
 		String results = "complete,duration,node_found,node_has_key,node_is_crashed,path_length,timeouts,nodes_contacted\n";
 		for(Lookup entry: this.lookup_table) {
 			results += entry.toCSV();
 		}
-		return results;
+		//return results;
+        BufferedWriter writer = null;
+        try {
+            //create a temporary file
+            String timeLog = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
+            File logFile = new File(timeLog+"_lookup.csv");
+            // This will output the full path where the file will be written to...
+            //System.out.println("Lookup file saved in " + logFile.getCanonicalPath());
+            writer = new BufferedWriter(new FileWriter(logFile));
+            writer.write(results);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                // Close the writer regardless of what happens...
+                writer.close();
+            } catch (Exception e) {
+            }
+        }
 	}
 	
 	public Integer firstNotCrashed(Integer key) {
@@ -378,8 +405,8 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 					succ_node = (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
 				}
 
-				System.out.println("\nJoining "+rndNode.getId()+ "  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
-				System.out.println("Joining with "+succ_node.getId());
+				//System.out.println("\nJoining "+rndNode.getId()+ "  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
+				//System.out.println("Joining with "+succ_node.getId());
 				rndNode.join(succ_node);
 			}
 		}
@@ -395,7 +422,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	 * @param space
 	 */
 	public void leaving_nodes(Context<Object> context, ContinuousSpace<Object> space, double join_interval) {
-		System.out.println("\nActive nodes before leaving: "+this.active_nodes.size());
+		//System.out.println("\nActive nodes before leaving: "+this.active_nodes.size());
 		int exiting_nodes_number = this.min_number_leaving + this.rnd.nextInt(this.leaving_amplitude);
 		exiting_nodes_number = exiting_nodes_number >= this.active_nodes.size() ? this.active_nodes.size() - 1 : exiting_nodes_number;
 		HashSet<Node> leaving_nodes = new HashSet<>();
@@ -416,13 +443,13 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 			i++;
 		}
 		
-		System.out.println("Active nodes after leaving: "+this.active_nodes.size());
+		//System.out.println("Active nodes after leaving: "+this.active_nodes.size());
 		
 		double time = schedule.getTickCount()+i+join_interval;
 		ScheduleParameters scheduleParamsJoin = ScheduleParameters.createOneTime(time);
 		schedule.schedule(scheduleParamsJoin, this, "join_new_nodes", context, space);
 		
-		System.out.println("\n"+schedule.getTickCount()+" next join batch scheduled at "+ time);
+		//System.out.println("\n"+schedule.getTickCount()+" next join batch scheduled at "+ time);
 	}
 	
 	public void nodeExit(Context<Object> context, Node node, HashSet<Node> leaving_nodes) {
@@ -451,7 +478,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		if(nodeIsTheGreatest) {
 			alredyFoundValidSucc = false;
 			for(Node smallerNode: smallerNodes) {
-				System.out.println("small node "+smallerNode.getId());
+				//System.out.println("small node "+smallerNode.getId());
 				if(!leaving_nodes.contains(smallerNode)   && !alredyFoundValidSucc) {
 					smallerNode.newData(node.getData());
 					node.leave();
@@ -460,12 +487,14 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 				}
 			}
 		}
-		System.out.println("\nLeaving node "+node.getId()+"  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
+		//System.out.println("\nLeaving node "+node.getId()+"  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
 		this.active_nodes.remove(node);
+		context.remove(node);
 	}
 	
 	public void forced_to_leave(Context<Object> context, Node node) {
-		System.out.println("\nForced leaving node "+node.getId()+"  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
+		//System.out.println("\nForced leaving node "+node.getId()+"  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
+		context.remove(node);
 		this.active_nodes.remove(node);
 		this.forced_to_leave++;
 		this.additional_joins++;
@@ -550,11 +579,11 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 			}
 		}
 		
-		System.out.println("\n--------------------------------------");
-		System.out.println("Correct: "+correct);
-		System.out.println("Wrong: "+wrong);
-		System.out.println("Incomplete: "+incomplete);
-		System.out.println("\nForced leaving: "+ this.forced_to_leave);
+		//System.out.println("\n--------------------------------------");
+		//System.out.println("Correct: "+correct);
+		//System.out.println("Wrong: "+wrong);
+		//System.out.println("Incomplete: "+incomplete);
+		//System.out.println("\nForced leaving: "+ this.forced_to_leave);
 		RunEnvironment.getInstance().pauseRun();
 	}
 	

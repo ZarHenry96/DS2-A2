@@ -1,0 +1,17 @@
+<repast.simphony.data2.engine.FileSinkDescriptor simphonyVersion="2.7.0">
+  <name>NodeSink</name>
+  <dataSet>NodeData</dataSet>
+  <delimiter>,</delimiter>
+  <format>TABULAR</format>
+  <sourceIds class="linked-hash-set">
+    <string>Id</string>
+    <string>MissingWrongSuccessorsNum</string>
+    <string>Crashed</string>
+    <string>Subscribed</string>
+    <string>Initialized</string>
+    <string>tick</string>
+    <string>DataSize</string>
+  </sourceIds>
+  <fileName>NodeData.csv</fileName>
+  <addTimeStamp>true</addTimeStamp>
+</repast.simphony.data2.engine.FileSinkDescriptor>

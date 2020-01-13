@@ -19,37 +19,37 @@
 									
 		/>
 				<parameter name="min_number_leaving" displayName="Leave - minimum # of nodes" type="int" 
-						defaultValue="2" 
+						defaultValue="10" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
 				<parameter name="crash_scheduling_interval" displayName="Crash - scheduling interval" type="double" 
-						defaultValue="20.0" 
+						defaultValue="60.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
 		/>
 				<parameter name="stab_amplitude" displayName="Stabilization - interval amplitude (variable)" type="int" 
-						defaultValue="0" 
+						defaultValue="1" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
 				<parameter name="recovery_interval" displayName="Crash - recovery interval" type="double" 
-						defaultValue="10.0" 
+						defaultValue="25.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
 		/>
 				<parameter name="m" displayName="Init - hash size" type="int" 
-						defaultValue="5" 
+						defaultValue="12" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
 				<parameter name="one_at_time_init" displayName="Init - initialise the ring one node at a time" type="boolean" 
-						defaultValue="true" 
+						defaultValue="false" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"
 									
@@ -67,13 +67,13 @@
 									
 		/>
 				<parameter name="init_num_nodes" displayName="Init - initial number of nodes" type="int" 
-						defaultValue="15" 
+						defaultValue="1000" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
 				<parameter name="succesors_size" displayName="Init - succesors list size" type="int" 
-						defaultValue="6" 
+						defaultValue="20" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
@@ -85,7 +85,7 @@
 									
 		/>
 				<parameter name="total_number_data" displayName="Data - number of keys" type="int" 
-						defaultValue="20" 
+						defaultValue="1500" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
@@ -97,37 +97,37 @@
 									
 		/>
 				<parameter name="insertion_delay" displayName="Init - delay between insertions (one node at a time)" type="double" 
-						defaultValue="6.0" 
+						defaultValue="1.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
 		/>
 				<parameter name="min_number_joins" displayName="Join - minimum # of nodes" type="int" 
-						defaultValue="2" 
+						defaultValue="10" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
 				<parameter name="crash_pr" displayName="Crash - node crash probability" type="double" 
-						defaultValue="0.01" 
+						defaultValue="0.05" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
 		/>
 				<parameter name="stab_offset" displayName="Stabilization - offset (minimum # of ticks)" type="double" 
-						defaultValue="5.0" 
+						defaultValue="15.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
 		/>
 				<parameter name="number_lookup" displayName="Lookup - number of lookups per batch" type="int" 
-						defaultValue="15" 
+						defaultValue="500" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
 				<parameter name="lookup_interval" displayName="Lookup - # of ticks between lookup batches" type="double" 
-						defaultValue="50.0" 
+						defaultValue="35.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
