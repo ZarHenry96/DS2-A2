@@ -77,8 +77,8 @@
 		\item lookup;
 		\item stabilization;
 		\item data management;
-		\item crash management;
-		\item ring leaving.
+		\item crash and recovery;
+		\item leave.
 	\end{itemize}
 	\vspace{-1pt}
 	Each of them will be examined in a specific Section. As regards the main fields, every node maintains: a finger table (the implementation will be presented in \cref{subsubsec:finger-table}), a list of successors, a reference to the predecessor and a key-value map for data. \newline
@@ -102,7 +102,22 @@
 	
 	\subsubsection{Stabilization}
 	\label{subsubsec:stabilization}
+	The stabilization protocol is run periodically to ensure that the various pointers (finger table, successors, predecessor) are up-to-date. The main method is \textit{stabilization()}, which starts the various operations. \newline
+	First of all, the node contacts sequentially its successors until it finds one alive (this is done in \textit{stabilization()}). At that point, if the predecessor of the replying node belongs to the interval $(nodeId,successorId)$ the current node updates its immediate successor (\textit{stabilization\_step()} method) \footnote{This may happen in case a new node has recently joined the ring.}. The next step consists in asking the immediate successor for its successor list, which is used to update the list of the current node. As regards the communication, it is managed through the methods \textit{processStabRequest()} and \textit{processStabResponse()}. In particular, the former method also verifies if the predecessor of the contacted node needs to be changed  (\textit{notifiedPredecessor()} method). In that case, the contacted node transfers the necessary data -if any- to the new predecessor and notifies the old predecessor that its successor should be changed (\textit{setNewSuccessor()} method) accelerating the integration of a new node in the ring. \newline
+	Once the response has been processed, the node moves on to the stabilization of the other pointers. This is done in the \textit{fix\_data\_structures()} method: basically, the node stabilizes alternatively one entry of the finger table (\textit{fix\_fingers()} method) and one entry of the successor list (\textit{fix\_successors()} method) in addition to the predecessor. As regards the finger table, the node calls the \textit{find\_successor()} method in order to find the responsible for the id the entry points to. Instead, as for the successor list, the node calls the same method on the id of the last stabilized successor plus one. Once the responsible has been found, the corresponding data structure is updated by the method \textit{setResult()}. In particular, since the first entry of the two data structures represent the immediate successor, they are never stabilized during this phase (it has already been done in the previous one). Finally, the node checks if the predecessor is still alive: if it is not, the pointer is set to \texttt{null}, which allows the node to accept a new predecessor in the next stabilization.
 	
+	\subsubsection{Data management}
+	\label{subsubsec:data-management}
+	The data management category includes two methods: \textit{transferDataUpToKey()} and \textit{newData()}. \newline
+	Basically, the former extracts the data with a hash value of the key up to a target value from the data owned by the current node, whereas the latter performs the acquisition of new data. In practice, these methods are exploited to transfer data: to the new predecessor; to the successor before leaving the ring (this operation is managed by the \texttt{TopologyBuilder}). 
+	
+	\subsubsection{Crash and recovery}
+	\label{subsubsec:crash-n-recovery}
+	Nodes failures are simulated as follows: each node periodically crashes with a certain probability (\textit{nodeCrash()} method) and schedules the recovery after a certain interval (\textit{recovery()} method). While failed the node does not process any request or response. Instead, once it is up again, it performs immediately a stabilization using the references it had before crashing.
+	
+	\subsubsection{Leave}
+	\label{subsubsec:leave}	
+		
 	\subsection{Support classes}
 	\label{subsec:support-classes}
 	
