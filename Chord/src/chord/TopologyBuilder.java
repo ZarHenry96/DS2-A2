@@ -65,7 +65,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		double crash_pr = params.getDouble("crash_pr");
 		double crash_scheduling_interval = params.getDouble("crash_scheduling_interval");
 		double recovery_interval = params.getDouble("recovery_interval");
-		int succesors_size = params.getInteger("succesors_size");
+		int succesors_size = params.getInteger("successors_size");
 		double stab_offset = params.getDouble("stab_offset");
 		int stab_amplitude = params.getInteger("stab_amplitude");
 		
@@ -157,7 +157,9 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		schedule.schedule(scheduleParamsDataGen, this, "data_generation", hash_size, key_size, data_size, total_number_data);
 		
 		double first_schedule = data_gen+this.lookup_interval;
+		
 		ScheduleParameters scheduleParamsLookup= ScheduleParameters.createRepeating(first_schedule, this.lookup_interval);
+		System.out.println("first lookup: "+first_schedule);
 		if(this.one_key_lookup) {
 			schedule.schedule(scheduleParamsLookup, this, "lookupSingleKey");
 		}else {
@@ -165,10 +167,10 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		}
 		// the first batch of join has to be scheduled after the last node insert makes a stabilization and after the data generation, similar the first leave 
 		double first_leave = (one_at_time_init ? init_num_nodes*insertion_delay+(stab_offset+stab_amplitude)+1 : (stab_offset+stab_amplitude)) + leave_interval+1;
-		System.out.println("first leave "+first_leave + "  "+join_interval);
+		System.out.println("first leave:  "+first_leave);
+		System.out.println("first join:  ~"+(first_leave+this.min_number_leaving+join_interval));
 
 		ScheduleParameters scheduleParamsleave = ScheduleParameters.createRepeating(first_leave, leave_interval);
-		
 
 		schedule.schedule(scheduleParamsleave, this, "leaving_nodes", context, space, join_interval);
 		

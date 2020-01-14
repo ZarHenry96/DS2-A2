@@ -53,6 +53,7 @@ public class NodeStyle extends DefaultStyleOGL2D {
 			label += n.getFinger().toString();
 			label += "\nSucc: "+(n.getSuccessors().isEmpty() ? "-" : n.getSuccessors().get(0).getId());
 			label += "\nPred: "+(n.getPredecessor() == null ? "-" : n.getPredecessor().getId());
+			label += "\nKey: "+(n.getLookupKey() == null ? "-" : n.getLookupKey());
 				
 			return label;
 		}

@@ -49,6 +49,7 @@ public class Node implements Comparable<Node>{
 	
 	private HashMap<Integer, String> data;
 	private ArrayList<Lookup> lookup_table;
+	private Integer lookup_key;
 	
 	/**
 	 * Public constructor
@@ -100,6 +101,7 @@ public class Node implements Comparable<Node>{
 		
 		this.data = new HashMap<>();
 		this.lookup_table = lookup_table;
+		this.lookup_key = null;
 	}
 	
 	/**
@@ -125,12 +127,11 @@ public class Node implements Comparable<Node>{
 	 * @param node reference to a node already in the ring
 	 */
 	public void join(Node node) {
+		this.subscribed = true;
 		this.resetPredecessor();
 		ArrayList<Node> prev_contacted_nodes = new ArrayList<>();
 		prev_contacted_nodes.add(this);
 		this.find_successor_step(node, prev_contacted_nodes, this.id, "init", 1, 0, 0, 0);
-		
-		this.subscribed = true;
 	}
 	
 	/**
@@ -149,6 +150,43 @@ public class Node implements Comparable<Node>{
 		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 		ScheduleParameters scheduleParams = ScheduleParameters.createOneTime(schedule.getTickCount()+this.crash_scheduling_interval);
 		schedule.schedule(scheduleParams, this, "nodeCrash");
+	}
+	
+	/**
+	 * Performs the lookup of a key in the ring
+	 * @param key target key
+	 * @param position index of the current lookup in the lookup_table
+	 */
+	public void lookup(int key, int position) {
+		this.lookup_key = key;
+		if(this.id == key) {
+			this.setResult(this, "lookup", position, 0, 0, 0);
+		} else {
+			this.find_successor(key, "lookup", position);
+		}
+	}
+	
+	/**
+	 * Looks for the node responsible for the given identifier 
+	 * @param id id of interest
+	 * @param target_dt target data structure: "init", "finger", "successors" or "lookup"
+	 * @param position index in the target data structure
+	 */
+	public void find_successor(int id, String target_dt, int position) {
+		if (this.successors.isEmpty()) {
+			if (target_dt == "lookup") {
+				setResult(this, target_dt, position, -1, -1, -1);
+			}
+			this.forcedLeaving();
+		} else {
+			if(Utils.belongsToInterval(id, this.id, this.successors.get(0).getId())) {
+				setResult(this.successors.get(0), target_dt, position, 1, 0, 1);
+			} else {
+				ArrayList<Node> prev_contacted_nodes = new ArrayList<>();
+				prev_contacted_nodes.add(this);
+				this.find_successor_step(this.closest_preceding_node(id), prev_contacted_nodes, id, target_dt, position, 0, 0, 0);
+			}
+		}
 	}
 	
 	/**
@@ -185,29 +223,6 @@ public class Node implements Comparable<Node>{
 	}
 	
 	/**
-	 * Looks for the node responsible for the given identifier 
-	 * @param id id of interest
-	 * @param target_dt target data structure: "init", "finger", "successors" or "lookup"
-	 * @param position index in the target data structure
-	 */
-	public void find_successor(int id, String target_dt, int position) {
-		if (this.successors.isEmpty()) {
-			if (target_dt == "lookup") {
-				setResult(this, target_dt, position, -1, -1, -1);
-			}
-			this.forcedLeaving();
-		} else {
-			if(Utils.belongsToInterval(id, this.id, this.successors.get(0).getId())) {
-				setResult(this.successors.get(0), target_dt, position, 1, 0, 1);
-			} else {
-				ArrayList<Node> prev_contacted_nodes = new ArrayList<>();
-				prev_contacted_nodes.add(this);
-				this.find_successor_step(this.closest_preceding_node(id), prev_contacted_nodes, id, target_dt, position, 0, 0, 0);
-			}
-		}
-	}
-	
-	/**
 	 * Performs an iterative step of find_successor
 	 * @param target_node node to ask for the given id
 	 * @param prev_contacted_nodes list of previously contacted nodes
@@ -219,23 +234,25 @@ public class Node implements Comparable<Node>{
 	 * @param nodes_contacted number of nodes contacted
 	 */
 	public void find_successor_step(Node target_node, ArrayList<Node> prev_contacted_nodes, int id, String target_dt, int position, int path_length, int num_timeouts, int nodes_contacted) {
-		System.out.println("step "+this.id+ " -> "+target_node.getId()+" "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
-		
-		if(target_dt.equals("lookup")) { 
-			this.removeOutEdges();
-			this.viewNet.addEdge(this, target_node);
+		if(this.subscribed && !this.crashed) {
+			System.out.println("step "+this.id+ " -> "+target_node.getId()+" "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
+			
+			if(target_dt.equals("lookup")) { 
+				this.removeOutEdges();
+				this.viewNet.addEdge(this, target_node);
+			}
+			
+			Pair<Node, Boolean> return_value = target_node.processSuccRequest(id);
+			
+			double delay_req = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
+			double delay_resp = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
+			double delay_tot = return_value.getFirst() == null ? this.maximum_allowed_delay : delay_req+delay_resp;
+			
+			ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
+			ScheduleParameters scheduleParameters = ScheduleParameters
+					.createOneTime(schedule.getTickCount() + delay_tot/1000);
+			schedule.schedule(scheduleParameters, this, "processSuccResponse", return_value, target_node, prev_contacted_nodes, id, target_dt, position, path_length, num_timeouts, nodes_contacted);
 		}
-		
-		Pair<Node, Boolean> return_value = target_node.processSuccRequest(id);
-		
-		double delay_req = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
-		double delay_resp = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
-		double delay_tot = return_value.getFirst() == null ? this.maximum_allowed_delay : delay_req+delay_resp;
-		
-		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
-		ScheduleParameters scheduleParameters = ScheduleParameters
-				.createOneTime(schedule.getTickCount() + delay_tot/1000);
-		schedule.schedule(scheduleParameters, this, "processSuccResponse", return_value, target_node, prev_contacted_nodes, id, target_dt, position, path_length, num_timeouts, nodes_contacted);
 	}
 	
 	/**
@@ -300,8 +317,8 @@ public class Node implements Comparable<Node>{
 	 * @param nodes_contacted number of nodes contacted
 	 */
 	public void processSuccResponse(Pair<Node, Boolean> response, Node source, ArrayList<Node> prev_contacted_nodes, int id, String target_dt, int position, int path_length, int num_timeouts, int nodes_contacted) {
-		ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 		if(this.subscribed && !this.crashed) {
+			ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 			if(response.getFirst() == null) {
 				Node last_in_list = prev_contacted_nodes.get(prev_contacted_nodes.size()-1);
 				if(target_dt.equals("lookup")) { 
@@ -347,8 +364,6 @@ public class Node implements Comparable<Node>{
 					this.find_successor_step(response.getFirst(), prev_contacted_nodes, id, target_dt, position, path_length+1, num_timeouts, nodes_contacted+1);
 				}
 			}
-		} else {
-			this.removeOutEdges();
 		}
 	}
 	
@@ -439,9 +454,20 @@ public class Node implements Comparable<Node>{
 				break;
 			case "lookup":
 				ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
-				ScheduleParameters scheduleParameters = ScheduleParameters
-						.createOneTime(schedule.getTickCount() + Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay)/1000);
-				schedule.schedule(scheduleParameters, this.lookup_table.get(position), "setResult", successor, path_length, num_timeouts, nodes_contacted, Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay)/1000);
+				double delay_req = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
+				double delay_resp = Utils.getNextDelay(this.rnd, this.mean_packet_delay, this.maximum_allowed_delay);
+			
+				if(!successor.equals(this)) {
+					this.removeOutEdges();
+					this.viewNet.addEdge(this, successor);
+					ScheduleParameters scheduleParamsRemoveEdges = ScheduleParameters.createOneTime(schedule.getTickCount() + (delay_req+delay_resp)/1000);
+					schedule.schedule(scheduleParamsRemoveEdges, this, "resetLookupKey");
+				} else {
+					this.resetLookupKey();
+				}
+				
+				ScheduleParameters scheduleParameters = ScheduleParameters.createOneTime(schedule.getTickCount() + delay_req/1000);
+				schedule.schedule(scheduleParameters, this.lookup_table.get(position), "setResult", successor, path_length, num_timeouts, nodes_contacted, delay_resp/1000);
 		}
 	}
 	
@@ -792,7 +818,7 @@ public class Node implements Comparable<Node>{
 			ISchedule schedule = RunEnvironment.getInstance().getCurrentSchedule();
 			if(this.initialized && this.rnd.nextDouble() < this.crash_pr) {
 				this.crashed = true;
-				this.removeOutEdges();
+				this.resetLookupKey();
 				System.out.println("\nTick "+ RunEnvironment.getInstance().getCurrentSchedule().getTickCount() +", Node " +this.id.toString() + " is crashed");
 				ScheduleParameters scheduleParams = ScheduleParameters.createOneTime(schedule.getTickCount()+this.recovery_interval);
 				schedule.schedule(scheduleParams, this, "recovery");
@@ -924,7 +950,7 @@ public class Node implements Comparable<Node>{
 		this.stabphase = true;
 		this.data.clear();
 		
-		this.removeOutEdges();
+		this.resetLookupKey();
 	}
 	
 	/**
@@ -969,16 +995,11 @@ public class Node implements Comparable<Node>{
 	}
 	
 	/**
-	 * Performs the lookup of a key in the ring
-	 * @param key target key
-	 * @param position index of the current lookup in the lookup_table
+	 * Resets the lookup key and removes the outgoing edges
 	 */
-	public void lookup(int key, int position) {
-		if(this.id == key) {
-			this.setResult(this, "lookup", position, 0, 0, 0);
-		} else {
-			this.find_successor(key, "lookup", position);
-		}
+	public void resetLookupKey() {
+		this.lookup_key = null;
+		this.removeOutEdges();
 	}
 	
 	/**
@@ -1061,6 +1082,14 @@ public class Node implements Comparable<Node>{
 	 */
 	public Integer getDataSize() {
 		return this.data.size();
+	}
+	
+	/**
+	 * Returns the lookup key
+	 * @return the lookup key
+	 */
+	public Integer getLookupKey() {
+		return this.lookup_key;
 	}
 	
 	/**

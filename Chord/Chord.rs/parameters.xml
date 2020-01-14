@@ -19,7 +19,7 @@
 									
 		/>
 				<parameter name="min_number_leaving" displayName="Leave - minimum # of nodes" type="int" 
-						defaultValue="10" 
+						defaultValue="2" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
@@ -43,13 +43,13 @@
 									
 		/>
 				<parameter name="m" displayName="Init - hash size" type="int" 
-						defaultValue="12" 
+						defaultValue="5" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
 				<parameter name="one_at_time_init" displayName="Init - initialise the ring one node at a time" type="boolean" 
-						defaultValue="false" 
+						defaultValue="true" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$BooleanConverter"
 									
@@ -67,13 +67,13 @@
 									
 		/>
 				<parameter name="init_num_nodes" displayName="Init - initial number of nodes" type="int" 
-						defaultValue="1000" 
+						defaultValue="18" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
-				<parameter name="succesors_size" displayName="Init - succesors list size" type="int" 
-						defaultValue="20" 
+				<parameter name="successors_size" displayName="Init - successors list size" type="int" 
+						defaultValue="8" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
@@ -85,7 +85,7 @@
 									
 		/>
 				<parameter name="total_number_data" displayName="Data - number of keys" type="int" 
-						defaultValue="1500" 
+						defaultValue="20" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
@@ -97,19 +97,19 @@
 									
 		/>
 				<parameter name="insertion_delay" displayName="Init - delay between insertions (one node at a time)" type="double" 
-						defaultValue="1.0" 
+						defaultValue="40.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
 		/>
 				<parameter name="min_number_joins" displayName="Join - minimum # of nodes" type="int" 
-						defaultValue="10" 
+						defaultValue="2" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
 				<parameter name="crash_pr" displayName="Crash - node crash probability" type="double" 
-						defaultValue="0.05" 
+						defaultValue="0.01" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
 									
@@ -121,7 +121,7 @@
 									
 		/>
 				<parameter name="number_lookup" displayName="Lookup - number of lookups per batch" type="int" 
-						defaultValue="500" 
+						defaultValue="12" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
