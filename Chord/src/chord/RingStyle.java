@@ -5,6 +5,9 @@ import java.awt.Color;
 import repast.simphony.visualizationOGL2D.DefaultStyleOGL2D;
 import saf.v3d.scene.VSpatial;
 
+/**
+ * This class defines the style of the Chord ring in the simulator
+ */
 public class RingStyle extends DefaultStyleOGL2D {
 	
 	@Override

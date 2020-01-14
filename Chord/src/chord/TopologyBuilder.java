@@ -28,8 +28,9 @@ import repast.simphony.space.graph.Network;
 import repast.simphony.util.collections.Pair;
 import repast.simphony.engine.schedule.ISchedule;
 import repast.simphony.engine.schedule.ScheduleParameters;
+
 /**
- * This class loads all the parameters, after that initializes the chord ring and nodes, finally it schedules joins and leaves of batch of nodes from the chord ring. 
+ * This class loads all the parameters, initializes the Chord ring and the nodes and then schedules insertion/leaving/lookup batches 
  */
 public class TopologyBuilder implements ContextBuilder<Object> {
 
@@ -50,11 +51,11 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	private int additional_joins;
 	
 	/**
-	 * Repast constructor loads the simulation parameters, init nodes and chord ring, create the data and assign them to nodes and finally schedules leaves, joins and lookup. 
-	 * Two different initialization strategy can be choose trough the one_at_time_init simulation parameter.
-	 * Two different lookups strategy can be choose trough the one_key_lookup simulation parameter.
-	 * @param context context of repast.
-	 * @return context
+	 * Repast constructor: loads the simulation parameters; initializes the Chord ring and the nodes; generates the data and assigns them to the nodes; schedules leavings, insertions and lookups
+	 * Two different initialization strategies can be chosen trough the one_at_time_init simulator parameter
+	 * Two different lookups strategies can be chosen trough the one_key_lookup simulator parameter
+	 * @param context context of repast
+	 * @return the created context
 	 */
 	@Override
 	public Context<Object> build(Context<Object> context) {
@@ -181,15 +182,14 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	}
 	
 	/**
-	 * Initialization strategy where each node is inserted at time, giving a random node in the chord ring, and leaving it to find is correct successor.
-	 * this method must be public as the method is scheduled to add one node each insertion_delay steps, in order to allow the new node to perform at least one stabilization.
-	 * @param init_num_nodes the requested number of nodes that have to be initialized.
-	 * @param insertion_delay numbers of ticks between two insertion, should be greater or equals than stab_offset+stab_amplitude.
-	 * @param context the context where add nodes.
-	 * @param space the 2D space where add nodes.
+	 * Initialization strategy in which the nodes are inserted one at a time providing them with a random node already present the chord ring
+	 * insertion_delay ticks are waited between two insertions in order to allow the new node to perform at least one stabilization
+	 * @param init_num_nodes the number of nodes to initialize
+	 * @param insertion_delay numbers of ticks between two insertions; it should be greater or equal than stab_offset+stab_amplitude
+	 * @param context reference to the context
+	 * @param space reference to the 2D space
 	 */
-	public void one_at_time_init(int init_num_nodes, double insertion_delay, Context<Object> context, ContinuousSpace<Object> space) {
-		
+	public void one_at_time_init(int init_num_nodes, double insertion_delay, Context<Object> context, ContinuousSpace<Object> space) {	
 		Node node = this.all_nodes.get(this.rnd.nextInt(this.all_nodes.size()));
 		while(this.active_nodes.contains(node)) {
 			node = this.all_nodes.get(this.rnd.nextInt(this.all_nodes.size()));
@@ -205,9 +205,9 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 			while (succ_node.equals(node) || succ_node.isCrashed()){
 				succ_node = (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
 			}
-			//System.out.println("joining "+node.getId());
-			//System.out.println("joining with "+succ_node.getId());
-			//System.out.println(this.active_nodes.size());
+			System.out.println("joining "+node.getId());
+			System.out.println("joining with "+succ_node.getId());
+			System.out.println(this.active_nodes.size());
 			node.join(succ_node);
 		}
 		
@@ -216,14 +216,13 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 			ScheduleParameters scheduleParams = ScheduleParameters.createOneTime(schedule.getTickCount()+insertion_delay);
 			schedule.schedule(scheduleParams, this, "one_at_time_init", init_num_nodes, insertion_delay, context, space);
 		}
-		
 	}
 	
 	/**
-	 * Initialization strategy where init_num_nodes nodes are inserted together setting the right successor. 
-	 * @param init_num_nodes the requested number of nodes that have to be initialized.
-	 * @param context the context where add nodes.
-	 * @param space the 2D space where add nodes.
+	 * Initialization strategy in which init_num_nodes nodes are inserted concurrently providing them with the right immediate successor
+	 * @param init_num_nodes the number of nodes to initialize
+	 * @param context reference to the context
+	 * @param space reference to the 2D space 
 	 */
 	private void preloaded_configuration(int init_num_nodes, Context<Object> context, ContinuousSpace<Object> space) {
 		while(this.active_nodes.size() < init_num_nodes) {
@@ -238,24 +237,23 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		for( Node activeNode : this.active_nodes) {
 			Node nextNode = this.active_nodes.higher(activeNode) != null ? this.active_nodes.higher(activeNode) : this.active_nodes.first();
 			activeNode.initSuccessor(nextNode);
-		}
-		
+		}	
 	}
+	
 	/**
-	 * Create the a total of random string equals to total_number_data, which will works as data, each string has a length of data_size and 
-	 * the first key_size characters are used in order to make the hash_key. 
-	 * @param m hash size.
-	 * @param key_size number of characters used as key.
-	 * @param data_size lenght of the data.
-	 * @param total_number_data total number of data that will be generated.
+	 * Creates total_number_data random strings that will be the data; each string is data_size characters long and 
+	 * the first key_size characters are used as key 
+	 * @param m hash size
+	 * @param key_size number of characters used as key
+	 * @param data_size lenght of the data
+	 * @param total_number_data total number of data that will be generated
 	 */
 	public void data_generation(int m, int key_size, int data_size, int total_number_data) {
 		while(this.keys.size() != total_number_data) {
 			String data = RandomStringUtils.randomAlphabetic(data_size);
-			//System.out.println(data);
 			String key = data.substring(0, key_size);
 			Integer hashKey = Utils.getHash(key, m);
-			if(! this.keys.contains(hashKey)) {
+			if(!this.keys.contains(hashKey)) {
 				this.keys.add(hashKey);
 				HashMap<Integer, String> dataMap = new HashMap<>();
 				dataMap.put(hashKey, data);
@@ -276,7 +274,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	}
 	
 	/**
-	 * Lookup strategy where each lookups have a random key as objective.
+	 * Lookup strategy in which each node looks for a random key
 	 */
 	public void lookupMultipleKeys() {	
 		HashSet<Node> lookupingNodes = new HashSet<>();
@@ -308,7 +306,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	}
 	
 	/**
-	 * Lookup strategy where in a batch each lookup require the same key.
+	 * Lookup strategy in which all nodes look for the same key (the key is different at every lookup batch)
 	 */
 	public void lookupSingleKey() {
 		int hashKey = (new ArrayList<Integer>(this.keys)).get(this.rnd.nextInt(this.keys.size()));
@@ -319,8 +317,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 			if(node.isInitialized() && !node.isCrashed()) {
 				validNodes.add(node);
 			}
-		}
-		
+		}	
 		
 		if (this.number_lookup >= validNodes.size()) {
 			lookupingNodes.addAll(validNodes);
@@ -341,7 +338,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	}
 	
 	/**
-	 * Writes a CSV file with all the lookups performed.
+	 * Writes a CSV file with all the lookups performed
 	 */
 	public void getLookupsResults() {
 		String results = "complete,duration,node_found,node_has_key,node_is_crashed,path_length,timeouts,nodes_contacted\n";
@@ -355,7 +352,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
             String timeLog = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
             File logFile = new File(timeLog+"_lookup.csv");
             // This will output the full path where the file will be written to...
-            //System.out.println("Lookup file saved in " + logFile.getCanonicalPath());
+            System.out.println("Lookup file saved in " + logFile.getCanonicalPath());
             writer = new BufferedWriter(new FileWriter(logFile));
             writer.write(results);
         } catch (Exception e) {
@@ -370,16 +367,17 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	}
 	
 	/**
-	 * This method is in charge to remove a variable number of nodes (between min_number_leave and this.min_number_leave + leave_amplitude) in the chord ring periodically, 
-	 * at least one node is left in the chord ring. 
-	 * To ensure that the nodes in the ring are correctly the first call is scheduled after stab_offset+stab_amplitude tick after the last node join in the initialization phase.
-	 * Each node leaving is scheduled to leave one tick of distance from the previous.
+	 * This method removes a variable number of nodes (between min_number_leave and this.min_number_leave + leave_amplitude) from the chord ring periodically;
+	 * at least one node is left in the ring. 
+	 * In order to be sure that the nodes in the ring are correct the first call is scheduled after stab_offset+stab_amplitude ticks since the last insertion in the initialization phase.
+	 * Two consecutive leavings are separated by one tick.
 	 * After the first call the method is scheduled every leave_interval.
-	 * @param context
-	 * @param space
+	 * @param context reference to the context
+	 * @param space reference to the continuous space
+	 * @param join_interval number of ticks between the last leaving and the insertions
 	 */
 	public void leaving_nodes(Context<Object> context, ContinuousSpace<Object> space, double join_interval) {
-		//System.out.println("\nActive nodes before leaving: "+this.active_nodes.size());
+		System.out.println("\nActive nodes before leaving: "+this.active_nodes.size());
 		int exiting_nodes_number = this.min_number_leaving + this.rnd.nextInt(this.leaving_amplitude);
 		exiting_nodes_number = exiting_nodes_number >= this.active_nodes.size() ? this.active_nodes.size() - 1 : exiting_nodes_number;
 		HashSet<Node> leaving_nodes = new HashSet<>();
@@ -400,37 +398,28 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 			i++;
 		}
 		
-		//System.out.println("Active nodes after leaving: "+this.active_nodes.size());
+		System.out.println("Active nodes after leaving: "+this.active_nodes.size());
 		
 		double time = schedule.getTickCount()+i+join_interval;
 		ScheduleParameters scheduleParamsJoin = ScheduleParameters.createOneTime(time);
 		schedule.schedule(scheduleParamsJoin, this, "join_new_nodes", context, space);
 		
-		//System.out.println("\n"+schedule.getTickCount()+" next join batch scheduled at "+ time);
+		System.out.println("\n"+schedule.getTickCount()+" next join batch scheduled at "+ time);
 	}
 	
 	/**
-	 * Proceed to make leaving the given node, and assign his data to the first greater node which is not leaving.
-	 * @param context
-	 * @param node which have to leave the ring.
-	 * @param leaving_nodes set of node leaving the ring.
+	 * Removes the node from the active ones and assign his data to the first greater node in the ring
+	 * @param context reference to the context
+	 * @param node node that has to leave the ring
+	 * @param leaving_nodes set of nodes leaving the ring
 	 */
-	
 	public void nodeExit(Context<Object> context, Node node, HashSet<Node> leaving_nodes) {
 		SortedSet<Node> greaterNodes = this.active_nodes.tailSet(node, false);
-		
 		SortedSet<Node> smallerNodes = this.active_nodes.headSet(node, false);
-		/*
-		for(Node smallerNode: smallerNodes) {
-			System.out.println("small node "+smallerNode.getId());
-		}
-		*/
 		
 		boolean nodeIsTheGreatest = true;
 		boolean alredyFoundValidSucc = false;
-		// System.out.println("node "+node.getId());
 		for(Node greaterNode: greaterNodes) {
-			// System.out.println("great node "+greaterNode.getId());
 			if(!leaving_nodes.contains(greaterNode) && !alredyFoundValidSucc) {
 				greaterNode.newData(node.getData());
 				node.leave();
@@ -442,8 +431,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		if(nodeIsTheGreatest) {
 			alredyFoundValidSucc = false;
 			for(Node smallerNode: smallerNodes) {
-				//System.out.println("small node "+smallerNode.getId());
-				if(!leaving_nodes.contains(smallerNode)   && !alredyFoundValidSucc) {
+				if(!leaving_nodes.contains(smallerNode) && !alredyFoundValidSucc) {
 					smallerNode.newData(node.getData());
 					node.leave();
 					alredyFoundValidSucc = true;
@@ -451,30 +439,27 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 				}
 			}
 		}
-		//System.out.println("\nLeaving node "+node.getId()+"  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
+		System.out.println("\nLeaving node "+node.getId()+"  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
 		this.active_nodes.remove(node);
-		context.remove(node);
 	}
 	
 	/**
-	 * Proceed to force leave the node given, and add one more node to join in the next join batch.
-	 * @param context
-	 * @param node which is forced to leave.
+	 * Removes the specified node from the active ones and add an additional node to the next join batch
+	 * @param node node that leaves the ring
 	 */
-	public void forced_to_leave(Context<Object> context, Node node) {
-		//System.out.println("\nForced leaving node "+node.getId()+"  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
-		context.remove(node);
+	public void forced_to_leave(Node node) {
+		System.out.println("\nForced leaving node "+node.getId()+"  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
 		this.active_nodes.remove(node);
 		this.forced_to_leave++;
 		this.additional_joins++;
 	}
 	
 	/**
-	 * This method is in charge to add a variable number of nodes (between min_number_joins and this.min_number_joins + join_amplitude + additional_joins) in the chord ring periodically, 
-	 * if all the available nodes are inserted no new nodes are inserted. 
-	 * To ensure that the nodes in the ring are correctly this is scheduled after stab_offset+stab_amplitude tick after each leave phase, and each node can not use as his successors a node which has just joined the ring.
-	 * @param context the context where add nodes.
-	 * @param space the 2D space where add nodes.
+	 * This method inserts a variable number of nodes (between min_number_joins and this.min_number_joins + join_amplitude + additional_joins) in the chord ring periodically;
+	 * if all the available nodes are already in the ring, no new nodes are inserted. 
+	 * In order to ensure that the nodes in the ring are correct, the insertions are scheduled after stab_offset+stab_amplitude ticks since the last leaving
+	 * @param context reference to the context
+	 * @param space reference to the 2D space
 	 */
 	public void join_new_nodes(Context<Object> context, ContinuousSpace<Object> space) {
 		int final_nodes_number = this.active_nodes.size() + this.min_number_joins + this.rnd.nextInt(this.join_amplitude) + this.additional_joins;
@@ -493,17 +478,17 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 					succ_node = (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
 				}
 
-				//System.out.println("\nJoining "+rndNode.getId()+ "  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
-				//System.out.println("Joining with "+succ_node.getId());
+				System.out.println("\nJoining "+rndNode.getId()+ "  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
+				System.out.println("Joining with "+succ_node.getId());
 				rndNode.join(succ_node);
 			}
 		}
 	}
 	
 	/**
-	 * Given a key returns the first node with an id greater or equals which is not crashed and initialized.
-	 * @param key key to search.
-	 * @return id of the first node not crashed grater or equals than the key.
+	 * Returns the first initialized and not crashed node with an id greater or equal than the hash value provided
+	 * @param key hash value of the key of interest
+	 * @return id of the first non-crashed node with an id grater or equal than the hash value provided
 	 */
 	public Integer firstNotCrashed(Integer key) {
 		boolean found = false;
@@ -535,20 +520,20 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	}
 	
 	/**
-	 *  Return the number of nodes that have been forced to leave.
-	 * @return number of nodes that have been forced to leave.
+	 *  Return the number of nodes that have been forced to leave
+	 * @return number of nodes that have been forced to leave
 	 */
 	public int getForcedToLeave() {
 		return this.forced_to_leave;
 	}
 	
 	/**
-	 * Returns a pair of lists containing the missing successors and the wrong ones w.r.t. the ones provided.
-	 * @param node the node of interest.
-	 * @param successors the successors list of the node of interest.
-	 * @param hashSize the hash size.
-	 * @param max_succ_size the maximum size of the successors list.
-	 * @return a Pair<ArrayList<Integer>,ArrayList<Integer>> containing the missing successors and the wrong ones w.r.t. the ones provided.
+	 * Returns a pair of lists containing the missing successors and the wrong ones w.r.t. the ones provided
+	 * @param node the node of interest
+	 * @param successors the successors list of the node of interest
+	 * @param hashSize the hash size
+	 * @param max_succ_size the maximum size of the successors list
+	 * @return a pair (ArrayList(Integer),ArrayList(Integer)) containing the missing successors and the wrong ones w.r.t. the ones provided
 	 */
 	public Pair<ArrayList<Integer>,ArrayList<Integer>> missingWrongSuccessors(Node node, ArrayList<Node> successors, Integer hashSize, Integer max_succ_size){
 		ArrayList<Integer> rightSucc = new ArrayList<>();
@@ -600,6 +585,9 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		return new Pair<ArrayList<Integer>,ArrayList<Integer>>(missingSucc,wrongSucc);
 	}
 	
+	/**
+	 * Prints some statistics about the lookups performed
+	 */
 	public void debug() {
 		int correct = 0;
 		int wrong = 0;
@@ -616,14 +604,15 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 			}
 		}
 		
-		//System.out.println("\n--------------------------------------");
-		//System.out.println("Correct: "+correct);
-		//System.out.println("Wrong: "+wrong);
-		//System.out.println("Incomplete: "+incomplete);
-		//System.out.println("\nForced leaving: "+ this.forced_to_leave);
-		RunEnvironment.getInstance().pauseRun();
+		System.out.println("\nCorrect: "+correct);
+		System.out.println("Wrong: "+wrong);
+		System.out.println("Incomplete: "+incomplete+"\n");
+		System.out.println("Forced leaving: "+ this.forced_to_leave);
 	}
 	
+	/**
+	 * Prints debug information about all active nodes
+	 */
 	public void printAll() {
 		for(Node n: this.active_nodes) {
 			n.debug();

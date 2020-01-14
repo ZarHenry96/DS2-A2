@@ -7,8 +7,12 @@ import repast.simphony.visualizationOGL2D.DefaultStyleOGL2D;
 import saf.v3d.scene.Position;
 import saf.v3d.scene.VSpatial;
 
+/**
+ * This class defines the style of the nodes in the simulator
+ */
 public class NodeStyle extends DefaultStyleOGL2D {
 	
+	@Override
 	public VSpatial getVSpatial(Object object, VSpatial spatial) {
 		if (spatial == null) {
 	    	if(object instanceof Node) {

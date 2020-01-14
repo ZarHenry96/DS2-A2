@@ -1,1 +1,1 @@
-typeSearchIndex = [{"l":"All Classes","url":"allclasses-index.html"},{"p":"chord","l":"Node"}]
+typeSearchIndex = [{"l":"All Classes","url":"allclasses-index.html"},{"p":"chord","l":"FingerTable"},{"p":"chord","l":"Lookup"},{"p":"chord","l":"Node"},{"p":"chord","l":"NodeStyle"},{"p":"chord","l":"Ring"},{"p":"chord","l":"RingStyle"},{"p":"chord","l":"TopologyBuilder"},{"p":"chord","l":"Utils"}]
