@@ -306,6 +306,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 			node.lookup(hashKey, this.lookup_table.size()-1);			
 		}
 	}
+	
 	/**
 	 * Lookup strategy where in a batch each lookup require the same key.
 	 */
@@ -340,7 +341,7 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 	}
 	
 	/**
-	 * Write a CSV file whit all the lookups performed.
+	 * Writes a CSV file with all the lookups performed.
 	 */
 	public void getLookupsResults() {
 		String results = "complete,duration,node_found,node_has_key,node_is_crashed,path_length,timeouts,nodes_contacted\n";
@@ -366,73 +367,6 @@ public class TopologyBuilder implements ContextBuilder<Object> {
             } catch (Exception e) {
             }
         }
-	}
-	
-	/**
-	 * Given a key return the first node with an id greater or equals which is not crashed and initialized.
-	 * @param key key to search.
-	 * @return id of the first node not crashed grater or equals than the key.
-	 */
-	
-	public Integer firstNotCrashed(Integer key) {
-		boolean found = false;
-		Node correctNode = null;
-		Iterator<Node> it = this.active_nodes.iterator();
-		while(it.hasNext() && !found) {
-			Node node = it.next();
-			if(!node.isCrashed() && node.isInitialized() && node.getId() >= key) {
-				found = true;
-				correctNode = node;
-				
-			}
-		}
-		if(!found) {
-			it = this.active_nodes.iterator();
-			while(it.hasNext() && !found) {
-				Node node = it.next();
-				if(!node.isCrashed() && node.isInitialized() && node.getId() < key) {
-					found = true;
-					correctNode = node;			
-				}
-			}
-		}
-		if(!found) {
-			return null;
-		} else {
-			return correctNode.getId();
-		}
-	}
-	
-	/**
-	 * This method is in charge to add a variable number of nodes (between min_number_joins and this.min_number_joins + join_amplitude + additional_joins) in the chord ring periodically, 
-	 * if all the available nodes are inserted no new nodes are inserted. 
-	 * To ensure that the nodes in the ring are correctly this is scheduled after stab_offset+stab_amplitude tick after each leave phase, and each node can not use as his successors a node which has just joined the ring.
-	 * @param context the context where add nodes.
-	 * @param space the 2D space where add nodes.
-	 */
-	public void join_new_nodes(Context<Object> context, ContinuousSpace<Object> space) {
-		int final_nodes_number = this.active_nodes.size() + this.min_number_joins + this.rnd.nextInt(this.join_amplitude) + this.additional_joins;
-		this.additional_joins = 0;
-		final_nodes_number  =  final_nodes_number > this.all_nodes.size() ? this.all_nodes.size() : final_nodes_number;
-		HashSet<Integer> new_join_ids = new HashSet<>();
-		while (this.active_nodes.size() != final_nodes_number ){
-			Node rndNode =  (new ArrayList<Node>(this.all_nodes)).get(this.rnd.nextInt(this.all_nodes.size()));
-			if (!this.active_nodes.contains(rndNode) && !new_join_ids.contains(rndNode.getId()) ) {
-				this.active_nodes.add(rndNode);
-				new_join_ids.add(rndNode.getId());
-				context.add(rndNode);
-				space.moveTo(rndNode, rndNode.getX(), rndNode.getY());
-				Node succ_node = rndNode;
-				while (succ_node.equals(rndNode) || new_join_ids.contains(succ_node.getId()) || succ_node.isCrashed()){
-					succ_node = (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
-				}
-
-				//System.out.println("\nJoining "+rndNode.getId()+ "  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
-				//System.out.println("Joining with "+succ_node.getId());
-				rndNode.join(succ_node);
-			}
-		}
-		
 	}
 	
 	/**
@@ -533,7 +467,71 @@ public class TopologyBuilder implements ContextBuilder<Object> {
 		this.active_nodes.remove(node);
 		this.forced_to_leave++;
 		this.additional_joins++;
+	}
 	
+	/**
+	 * This method is in charge to add a variable number of nodes (between min_number_joins and this.min_number_joins + join_amplitude + additional_joins) in the chord ring periodically, 
+	 * if all the available nodes are inserted no new nodes are inserted. 
+	 * To ensure that the nodes in the ring are correctly this is scheduled after stab_offset+stab_amplitude tick after each leave phase, and each node can not use as his successors a node which has just joined the ring.
+	 * @param context the context where add nodes.
+	 * @param space the 2D space where add nodes.
+	 */
+	public void join_new_nodes(Context<Object> context, ContinuousSpace<Object> space) {
+		int final_nodes_number = this.active_nodes.size() + this.min_number_joins + this.rnd.nextInt(this.join_amplitude) + this.additional_joins;
+		this.additional_joins = 0;
+		final_nodes_number  =  final_nodes_number > this.all_nodes.size() ? this.all_nodes.size() : final_nodes_number;
+		HashSet<Integer> new_join_ids = new HashSet<>();
+		while (this.active_nodes.size() != final_nodes_number ){
+			Node rndNode =  (new ArrayList<Node>(this.all_nodes)).get(this.rnd.nextInt(this.all_nodes.size()));
+			if (!this.active_nodes.contains(rndNode) && !new_join_ids.contains(rndNode.getId()) ) {
+				this.active_nodes.add(rndNode);
+				new_join_ids.add(rndNode.getId());
+				context.add(rndNode);
+				space.moveTo(rndNode, rndNode.getX(), rndNode.getY());
+				Node succ_node = rndNode;
+				while (succ_node.equals(rndNode) || new_join_ids.contains(succ_node.getId()) || succ_node.isCrashed()){
+					succ_node = (new ArrayList<Node>(this.active_nodes)).get(this.rnd.nextInt(this.active_nodes.size()));
+				}
+
+				//System.out.println("\nJoining "+rndNode.getId()+ "  "+RunEnvironment.getInstance().getCurrentSchedule().getTickCount());
+				//System.out.println("Joining with "+succ_node.getId());
+				rndNode.join(succ_node);
+			}
+		}
+	}
+	
+	/**
+	 * Given a key returns the first node with an id greater or equals which is not crashed and initialized.
+	 * @param key key to search.
+	 * @return id of the first node not crashed grater or equals than the key.
+	 */
+	public Integer firstNotCrashed(Integer key) {
+		boolean found = false;
+		Node correctNode = null;
+		Iterator<Node> it = this.active_nodes.iterator();
+		while(it.hasNext() && !found) {
+			Node node = it.next();
+			if(!node.isCrashed() && node.isInitialized() && node.getId() >= key) {
+				found = true;
+				correctNode = node;
+				
+			}
+		}
+		if(!found) {
+			it = this.active_nodes.iterator();
+			while(it.hasNext() && !found) {
+				Node node = it.next();
+				if(!node.isCrashed() && node.isInitialized() && node.getId() < key) {
+					found = true;
+					correctNode = node;			
+				}
+			}
+		}
+		if(!found) {
+			return null;
+		} else {
+			return correctNode.getId();
+		}
 	}
 	
 	/**
