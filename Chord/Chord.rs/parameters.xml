@@ -78,7 +78,7 @@
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
-				<parameter name="leave_interval" displayName="Leave - # of ticks between different leaves" type="double" 
+				<parameter name="leave_interval" displayName="Leave - # of ticks between different leave batches" type="double" 
 						defaultValue="50.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
