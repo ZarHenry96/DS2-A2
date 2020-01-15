@@ -154,6 +154,14 @@
 	
 	\section{Analyses and Results}
 	\label{sec:analyses}
+
+	This section presents the simulation runs that have been executed to test the protocol strength and performance, with their respective analyses and results explanations. The parameters involved in our simulations are explained in \cref{tab:default_params}, with the corresponding default parameters. The performed runs are designed with variations on the default parameters so four analyses are possible, namely:
+	\begin{itemize}
+		\item Crash probability analysis (\cref{subsec:crash_analysis}), in order to understand the impact of having a higher number of nodes crashing during the protocol, causing errors in the other nodes data structures;
+		\item Network size analysis (\cref{subsec:netsize_analysis}), with proportioned lookup batch sizes, allows both for scaling testing and for lookup load stress-testing;
+		\item Key number analysis (\cref{subsec:keyno_analysis}), testing the scaling performance of the protocol wrt the number of keys in the system
+	\end{itemize}
+	
 	\begin{table}[!ht]
 		\caption{Default protocol parameters for the executed experimental runs.}
 		\label{tab:default_params}
@@ -204,40 +212,95 @@
 			\hline
 		\end{tabular}
 	\end{table}
-
-	This section presents the simulation runs that have been executed to test the protocol strength and performance, with their respective analyses and results explanations. The parameters involved in our simulations are explained in \cref{tab:default_params}, with the corresponding default parameters. The performed runs are designed with variations on the default parameters so four analyses are possible, namely:
-	\begin{itemize}
-		\item Crash probability analysis (\cref{subsec:crash_analysis}), in order to understand the impact of having a higher number of nodes crashing during the protocol, causing errors in the other nodes data structures;
-		\item Network size analysis (\cref{subsec:netsize_analysis}), with proportioned lookup batch sizes, allows both for scaling testing and for lookup load stress-testing;
-		\item Key number analysis (\cref{subsec:keyno_analysis}), testing the scaling performance of the protocol wrt the number of keys in the system
-	\end{itemize}
 	
 	\subsection{Impact of crashing nodes}
 	\label{subsec:crash_analysis}
-	
-	\begin{table}[h!]
-		\caption{Variations of the default parameters for the node crashing impact analysis. Note that \texttt{R01} is the default run with no variations}
-		\label{tab:crash_runs}
-		\centering
-		\begin{tabular}{cc}
-			\hline
-			\textbf{Run} & \textbf{Crash probability}\\
-			\hline
-			\texttt{R01} & $0.05$\\
-			\hline
-			\texttt{R02} & $0.1$\\
-			\hline
-			\texttt{R03} & $0.2$\\
-			\hline
-			\texttt{R04} & $0.3$\\
-			\hline
-		\end{tabular}
-	\end{table}		
+		\Cref{tab:crash_runs} lists the runs performed in order to analyse the impact of higher percentages of crashing nodes. First of all, the plot in \Cref{fig:crash0} validate the experimental runs, as we can see how the number of nodes is consistent throughout each run, with a reasonable expected difference between them. 
+						
+		\begin{table}[h!]
+			\caption{Variations of the default parameters for the node crashing impact analysis. Note that \texttt{R01} is the default run with no variations}
+			\label{tab:crash_runs}
+			\centering
+			\begin{tabular}{cc}
+				\hline
+				\textbf{Run} & \textbf{Crash probability}\\
+				\hline
+				\texttt{R01} & $0.05$\\
+				\hline
+				\texttt{R02} & $0.1$\\
+				\hline
+				\texttt{R03} & $0.2$\\
+				\hline
+				\texttt{R04} & $0.3$\\
+				\hline
+			\end{tabular}
+		\end{table}
+		\begin{figure}[h]
+			\centering
+			\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis1/nodesup_time.pdf}
+			\caption{Number of working nodes throughout the runs}
+			\label{fig:crash0}
+		\end{figure}
 
+		The plots (\Cref{fig:crash1,fig:crash2,fig:crash3,fig:crash4,fig:crash5,fig:crash6}) clearly shows how the protocol is resistant even to a third of the total nodes periodically experiencing a sudden crash. Particularly, \Cref{fig:crash1} shows how the number of steps needed for a lookup slightly increases in mean and variance with the crashing probability, consequently increasing the average lookup duration which quickly stabilizes after an initial transient state, as can be observed in \Cref{fig:crash2}. 
+
+		\begin{figure}[!h]
+			\centering
+			\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis1/lookuplength_box.pdf}
+			\caption{Boxplot showing the number of steps needed to complete a lookup for each run}
+			\label{fig:crash1}
+		\end{figure}
+		\begin{figure}[!h]
+			\centering
+			\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis1/lookupduration_time.pdf}
+			\caption{Average duration of lookups throughout each run}
+			\label{fig:crash2}
+		\end{figure}
+
+		Furthermore, \Cref{fig:crash3} confirms that lookups takes longer due to a higher quantity of contacted nodes, not because the lookups find valid fingers, value which also stabilizes after an initial transient state (around $\sim400$ ticks) as shown in \Cref{fig:crash4}. The crash probability parameter has also an impact on the number of timeout which are experienced by a lookup, in particular in the initial phase of the protocol in which the data structures are not yet fully populated (see \Cref{fig:crash5}). 
+
+		\begin{figure}[!h]
+			\centering
+			\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis1/nodescontacted_box.pdf}
+			\caption{Boxplot of the number of nodes contacted to complete a lookup for each run}
+			\label{fig:crash3}
+		\end{figure}
+		\begin{figure}[!h]
+			\centering
+			\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis1/nodescontacted_time.pdf}
+			\caption{Average number of nodes contacted for a lookup throughout each run}
+			\label{fig:crash4}
+		\end{figure}
+		\begin{figure}[!h]
+			\centering
+			\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis1/timeouts_time.pdf}
+			\caption{Timeouts experienced by nodes during lookups throughout each run}
+			\label{fig:crash5}
+		\end{figure}
+
+		Intuitively, a higher crashing probability should cause more lookup failures, however the protocol resistance is again shown in \Cref{fig:crash6}, where the number of failed lookups ($\sim4\times10^1$) is negligible wrt the total number of lookups ($\sim7\times10^4$). 
+
+		\begin{figure}[!h]
+			\centering
+			\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis1/failedlookups.pdf}
+			\caption{Number of failed lookup. Note that the total number of lookups for these runs is $\sim7\times10^4$}
+			\label{fig:crash6}
+		\end{figure}
+	
+		An interesting analysis is the one presented in \Cref{fig:crash7}, where the number of error present in the nodes data structures can be observed. As expected, a greater quantity of crashing nodes implies more errors, which are still contained and constant throughout the runs.
+		
+		\begin{figure}[!h]
+			\centering
+			\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis1/errors_box.pdf}
+			\caption{Number of errors in the nodes data structures, i.e. nodes that unsubscribed or crashed in the finger table and/or in the successors list}
+			\label{fig:crash7}
+		\end{figure}
+	
 	\subsection{Protocol network size scaling}
 	\label{subsec:netsize_analysis}
-	
-	\begin{table}[h!]
+	Further tests have been performed in order to verify the scalability of the algorithm, with the runs listed in \Cref{tab:netsize_runs}. Several parameters have been varied parallelly, so that the values matches meaningful realistic situations. 
+		
+	\begin{table}[!h]
 		\caption{Variations of the default parameters for the scaling analysis runs. \texttt{R01} is omitted being the default run with no variations.}
 		\label{tab:netsize_runs}
 		\centering
@@ -303,12 +366,34 @@
 			\hline
 		\end{tabular}
 	\end{table}		
+
+	The plot in \Cref{fig:netsize0} shows how the duration of a lookup increases with a bigger network, however the average lookup length is still very low, showing how the 
+
+	\begin{figure}[!h]
+		\centering
+		\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis2/lookupduration_box.pdf}
+			\caption{Boxplot of the lookups durations for each run}
+		\label{fig:netsize0}
+	\end{figure}	
+	\begin{figure}[!h]
+		\centering
+		\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis2/lookuplength_time.pdf}
+			\caption{Average duration of lookups throughout each run}
+		\label{fig:netsize1}
+	\end{figure}
+	
+		\begin{figure}[!h]
+		\centering
+		\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis2/errors_box.pdf}
+		\caption{test}
+		\label{fig:netsize2}
+	\end{figure}
 	
 	\subsection{Performance and quantity of keys}
 	\label{subsec:keyno_analysis}
 
-	\begin{table}[h!]
-		\caption{Variations of \texttt{SC} runs on the default parameters.}
+	\begin{table}[!h]
+		\caption{Variations of the default parameters for the key quantity analysis.}
 		\label{tab:keyno_runs}
 		\centering
 		\begin{tabular}{cc}
