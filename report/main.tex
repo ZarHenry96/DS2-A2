@@ -16,8 +16,13 @@
 \usepackage{appendix}
 \usepackage{booktabs}
 \bibliography{biblio}
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 
 \captionsetup[figure]{font=small}
+\captionsetup[table]{font=small}
 
 \begin{document}
 	
@@ -94,7 +99,7 @@
 	\vspace{-1pt}
 	Each of them will be examined in a specific Section. As regards the main fields, every node maintains: a finger table (the implementation will be presented in \cref{subsubsec:finger-table}), a list of successors, a reference to the predecessor and a key-value map for data. \newline
 	Basically, the finger table - as a routing table - allows to perform efficient and scalable lookups. In fact, the finger table is not needed for correctness\footnote{It is sufficient that every node knows its successor to achieve correctness.} but avoids lookups characterised by a number of messages linear in the number of nodes. \newline
-	Instead, the list of successors improves the robustness to failures and departures w.r.t. just a reference to the immediate successor. In fact, all successors would have to fail simultaneously in order to destroy the ring. It is worth mentioning that the first element of the finger table and the first element of the successor list coincide. \newline
+	Instead, the list of successors improves the robustness to failures and departures . just a reference to the immediate successor. In fact, all successors would have to fail simultaneously in order to destroy the ring. It is worth mentioning that the first element of the finger table and the first element of the successor list coincide. \newline
 	As regards the reference to the predecessor, it is exploited by the stabilization algorithm to maintain the consistency of the successors and is used to transfer part of the data to the new responsible in presence of a join.
 	
 	\subsubsection{Initialization}
@@ -166,7 +171,8 @@
 	
 	\section{Analyses and Results}
 	\label{sec:analyses}
-	This section presents the simulation runs that have been executed to test the protocol strength and performance, with the respective analyses and results explanations. The parameters involved in our simulations are presented in \cref{tab:default_params}, with the corresponding default values. The runs performed are designed with variations on the default parameters so that four analyses are possible, namely:
+	This section presents the simulation runs that have been executed to test the protocol strength and performance, with their respective analyses and results explanations. The parameters involved in our simulations are explained in \cref{tab:default_params}, with the corresponding default parameters. The performed runs are designed with variations on the default parameters so three analyses are possible, namely:
+
 	\begin{itemize}
 		\item Crash probability analysis (\cref{subsec:crash_analysis}), in order to understand the impact of having a higher number of nodes crashing during the protocol execution, causing errors in the other nodes' data structures;
 		\item Network size analysis (\cref{subsec:netsize_analysis}), with proportioned lookup batch sizes; it allows both for scaling testing and for lookup load stress-testing;
@@ -268,21 +274,22 @@
 			\label{fig:crash2}
 		\end{figure}
 
-		Furthermore, \Cref{fig:crash3} confirms that lookups take longer due to a higher quantity of contacted nodes, \textbf{??} not because the lookups find valid fingers, value which also stabilizes after an initial transient state (around $\sim400$ ticks) as shown in \Cref{fig:crash4}. The crash probability parameter has also an impact on the number of timeouts which are experienced by a lookup, in particular in the initial phase of the protocol in which the data structures are not yet fully populated (see \Cref{fig:crash5}). 
+		Furthermore, \Cref{fig:crash3} confirms that lookups take longer due to a higher quantity of contacted nodes and not only because the lookups find valid fingers, value which also stabilizes after an initial transient state (around $\sim400$ ticks) as shown in \Cref{fig:crash4}. The crash probability parameter has also an impact on the number of timeouts which are experienced by a lookup, in particular in the initial phase of the protocol in which the data structures are not yet fully populated (see \Cref{fig:crash5}). 
 
-		\begin{figure}[!h]
+		\begin{figure}[!ht]
 			\centering
 			\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis1/nodescontacted_box.pdf}
 			\caption{Boxplot of the number of nodes contacted to complete a lookup for each run}
 			\label{fig:crash3}
 		\end{figure}
-		\begin{figure}[!h]
+		\begin{figure}[!ht]
 			\centering
+			\vspace{-0.7cm}
 			\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis1/nodescontacted_time.pdf}
 			\caption{Average number of nodes contacted for a lookup throughout each run}
 			\label{fig:crash4}
 		\end{figure}
-		\begin{figure}[!h]
+		\begin{figure}[!ht]
 			\centering
 			\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis1/timeouts_time.pdf}
 			\caption{Timeouts experienced by nodes during lookups throughout each run}
@@ -291,7 +298,7 @@
 
 		Intuitively, a higher crashing probability should cause more lookup failures, however the protocol resistance is again shown in \Cref{fig:crash6}, where the number of failed lookups ($\sim4\times10^1$) is negligible w.r.t. the total number of lookups ($\sim7\times10^4$). 
 
-		\begin{figure}[!h]
+		\begin{figure}[!ht]
 			\centering
 			\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis1/failedlookups.pdf}
 			\caption{Number of failed lookup. Note that the total number of lookups for these runs is $\sim7\times10^4$}
@@ -437,7 +444,7 @@
 		\label{fig:keys1}
 	\end{figure}
 	
-	Another interesting analysis has been performed on the borderline case in which the lookups in the same batch look for the same exact key. Plots in \Cref{fig:keys2,fig:keys3} show how the protocol withstands the stress of the \textit{single-key-lookup}~(\textit{skl}) both for what concerns the number of steps and the lookup duration, the latter presenting some spikes probably due to some node crashing with a yet not distributed information needed for some lookup.\\
+	Another interesting analysis has been performed on the borderline case in which the lookups in the same batch look for the same exact key. Plots in \Cref{fig:keys2,fig:keys3} show how the protocol withstands the stress of the \textit{single-key-lookup}~(\textit{skl}) both for what concerns the number of steps and the lookup duration, the latter presenting some spikes probably due to some node crashing with a yet not distributed information needed for some lookup.
 
 	\begin{figure}[ht]
 		\centering
@@ -452,7 +459,8 @@
 		\label{fig:keys3}
 	\end{figure}
 	
-	Finally, it's important to check how the average quantity of keys managed by a node changes with different network sizes. \Cref{fig:keys4} shows how this value is distributed for the runs in \Cref{tab:netsize_runs}: considering that the total number of keys is balanced w.r.t. the number of nodes of the configuration, the expectation is to have similar distributions, which is actually observed in the plot. 
+	Finally, it's important to check how the average quantity of keys managed by a node changes with different network sizes. \Cref{fig:keys4} shows how this value is distributed for the runs in \Cref{tab:netsize_runs}: considering that the total number of keys is balances w.r.t. the number of nodes of the configuration, the expectation is to have similar distributions, which is actually observed in the plot.
+	
 	\begin{figure}[!t]
 		\centering
 		\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis3/keyspernode.pdf}
@@ -461,24 +469,62 @@
 	\end{figure}	
 
 	\subsection{Plotting script usage}
-		The plots for the performed analyses has been generated with the \texttt{chord\_analyzer.py} script, which was implemented for this purpose. The arguments usage is explained in \Cref{tab:script}.
+		The plots for the performed analyses has been generated with the \texttt{chord\_analyzer.py} script, which was implemented for this purpose. The arguments usage is explained in \Cref{tab:script}. A valid script execution is the following: \\
+		\texttt{\hspace*{1cm}python3\textvisiblespace \\\hspace*{1cm}chord\_analyzer.py\textvisiblespace \\\hspace*{1cm}../data.nosync\textvisiblespace \\\hspace*{1cm}loadnodes,nodesup,errors\_box\textvisiblespace \\\hspace*{1cm}01,02,03,04\textvisiblespace \\\hspace*{1cm}all=3,errors\_box=0}
+		
+		
 		\begin{table}[!h]
+			\caption{Plotting script parameters}
+			\label{tab:script}
 			\centering
-			\begin{tabular}{cl}
+			\begin{tabular}{cL{0.8\columnwidth}}
 				\hline
 				\textbf{Arg} & \textbf{Usage}\\
 				\hline
 				1 & Base folder where the Repast logging files are located\\
 				\hline
-				2 & Requests for the scripts, comma separated. \textit{loadnodes} and \textit{loadlookups} respectively loads the Lookup and Node datasets. \textit{all} generates all the implemented plots possible with the loaded datasets, which can also be selectively chosen with the corresponding names ("lookupduration\_time", lookupduration\_box", errors\_time", errors\_box", timeouts\_time", timeouts\_box", nodescontacted\_time", nodescontacted\_box", lookuplength\_time", lookuplength\_box", keyspernode", "nodesup\_time", failedlookups")\\
+				2 & Requests for the scripts, comma separated. \texttt{loadnodes} and \texttt{loadlookups} respectively loads the Lookup and Node datasets. \texttt{all} generates all the implemented plots possible with the loaded datasets, which can also be selectively chosen with the corresponding names (see \Cref{tab:plots})\\
 				\hline
-				3 & Log files index (XX) to load, comma separated. Expecting Lookup\_XX and Node\_XX file as data sinks names\\
+				3 & Log files index \texttt{XX} to load, comma separated. Expecting \textit{Lookup\_XX} and \textit{Node\_XX} file as data sinks names\\
 				\hline
-				4 & \\
+				4 & Comma separated title indexes for each selected plot type (\textit{all} can also be selected), use \texttt{plotname=index}, default \texttt{all=0}\\
 				\hline
-				5 & \\
+			\end{tabular}
+		\end{table}
+
+		\begin{table}[!h]
+			\caption{Plots implemented in the plotting script}
+			\label{tab:plots}
+			\centering
+			\begin{tabular}{C{0.4\columnwidth}L{0.6\columnwidth}}
 				\hline
-				6 & \\
+				\textbf{plot name}&\textbf{explanation}\\
+				\hline
+				lookupduration\_time&time plot of the average lookup duration\\
+				\hline
+				lookupduration\_box&boxplot of the lookup duration\\
+				\hline
+				errors\_time&time plot of the average number of errors in a node data structures\\
+				\hline
+				errors\_box&boxplot of the number of errors in a node data structures\\
+				\hline
+				timeouts\_time&time plot of the number of timeouts experienced for a lookup\\
+				\hline
+				timeouts\_box&boxplot of the number of timeouts experienced for a lookup\\
+				\hline
+				nodescontacted\_time&time plot of the number of nodes contacted for a lookup\\
+				\hline
+				nodescontacted\_box&boxplot of the number of nodes contacted for a lookup\\
+				\hline
+				lookuplength\_time&time plot of the number of steps needed for a lookup\\
+				\hline
+				lookuplength\_box&boxplot of the number of steps needed for a lookup\\
+				\hline
+				keyspernode&boxplot of the number of keys per node\\
+				\hline
+				nodesup\_time&time plot of the number of working nodes (not crashed, subscribed and initialized)\\
+				\hline
+				failedlookups&bar plot of the number of failed lookups throughout each run\\
 				\hline
 			\end{tabular}
 		\end{table}
