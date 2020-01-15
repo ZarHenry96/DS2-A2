@@ -17,6 +17,8 @@
 \usepackage{booktabs}
 \bibliography{biblio}
 
+\captionsetup[figure]{font=small}
+
 \begin{document}
 	
 	%%%%%%%%% TITLE
@@ -301,13 +303,33 @@
 		\begin{figure}[!h]
 			\centering
 			\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis1/errors_box.pdf}
-			\caption{Number of errors in the nodes data structures, i.e. nodes that unsubscribed or crashed in the finger table and/or in the successors list}
+			\caption{Average number of errors in the a node data structures, i.e. caused by nodes that unsubscribed or crashed while being in the finger table and/or in the successors list of another node. Considering runs with different crash probabilities.}
 			\label{fig:crash7}
 		\end{figure}
 	
 	\subsection{Protocol network size scaling}
 	\label{subsec:netsize_analysis}
 	Further tests have been performed in order to verify the scalability of the algorithm, with the runs listed in \Cref{tab:netsize_runs}. Several parameters have been varied parallelly, so that the values matches meaningful realistic situations. 
+
+
+	\begin{figure}[!ht]
+		\centering
+		\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis2/lookupduration_box.pdf}
+		\caption{Boxplot of the lookups durations for each run}
+		\label{fig:netsize0}
+	\end{figure}	
+	\begin{figure}[!ht]
+		\centering
+		\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis2/lookuplength_time.pdf}
+		\caption{Average duration of lookups throughout each run}
+		\label{fig:netsize1}
+	\end{figure}
+	\begin{figure}[!ht]
+		\centering
+		\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis2/errors_box.pdf}
+		\caption{Average number of errors in the a node data structures, i.e. caused by nodes that unsubscribed or crashed while being in the finger table and/or in the successors list of another node. Considering runs with different network sizes.}
+		\label{fig:netsize2}
+	\end{figure}	
 		
 	\begin{table}[!h]
 		\caption{Variations of the default parameters for the scaling analysis runs. \texttt{R01} is omitted being the default run with no variations.}
@@ -376,32 +398,15 @@
 		\end{tabular}
 	\end{table}		
 
-	The plot in \Cref{fig:netsize0} shows how the duration of a lookup increases with a bigger network, however the average lookup length is still very low, showing how the 
-
-	\begin{figure}[!h]
-		\centering
-		\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis2/lookupduration_box.pdf}
-			\caption{Boxplot of the lookups durations for each run}
-		\label{fig:netsize0}
-	\end{figure}	
-	\begin{figure}[!h]
-		\centering
-		\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis2/lookuplength_time.pdf}
-			\caption{Average duration of lookups throughout each run}
-		\label{fig:netsize1}
-	\end{figure}
+	The plot in \Cref{fig:netsize0} shows how the duration of a lookup increases with a bigger network, however the average lookup length (\Cref{fig:netsize1}) is still very low, showing the scalability power and efficiency of the protocol.
 	
-		\begin{figure}[!h]
-		\centering
-		\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis2/errors_box.pdf}
-		\caption{test}
-		\label{fig:netsize2}
-	\end{figure}
+	Another important observation is that the average number of errors in the node data structures is low and under control, although presenting more outliers with bigger networks, which is expected as with the corresponding larger successors lists and finger tables. This behaviour is shown in the plot in \Cref{fig:netsize2}.
+
 	
 	\subsection{Performance and quantity of keys}
 	\label{subsec:keyno_analysis}
-
-	\begin{table}[!h]
+	Several runs have been executed in order to test whether the number of keys to manage influences the protocol performance (listed in \Cref{tab:keyno_runs}). The results shown in \Cref{fig:keys0,fig:keys1} shows how lookups are not impacted at all by the much greater number of keys, as the lookups duration is very similar in value and trend in all the cases, with the average number of steps corresponding almost exactly.
+	\begin{table}[t]
 		\caption{Variations of the default parameters for the key quantity analysis.}
 		\label{tab:keyno_runs}
 		\centering
@@ -420,12 +425,68 @@
 		\end{tabular}
 	\end{table}		
 
+	\begin{figure}[t]
+		\centering
+		\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis3/lookupduration_time.pdf}
+		\caption{Duration of lookups throughout runs, considering different numbers of keys}
+		\label{fig:keys0}
+	\end{figure}
+	\begin{figure}[!h]
+		\centering
+		\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis3/lookuplength_box.pdf}
+		\caption{Distribution of the number of steps needed for a lookup, considering the runs with different number of keys}
+		\label{fig:keys1}
+	\end{figure}
+	
+	Another interesting analysis has been performed on the borderline case in which the lookups in the same batch requests the same exact key. Plots in \Cref{fig:keys2,fig:keys3} shows how the protocol withstands the stress of the \textit{single-key-lookup}~(\textit{skl}) both for what concerns the number of steps and the lookup duration, the latter presenting some spikes probably due to some node crashing with a yet not distributed information needed for some lookup.\\
+
+	\begin{figure}[ht]
+		\centering
+		\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis3/skl_lookupduration_time.pdf}
+		\caption{Duration of lookups throughout runs, considering the single-lookup case (skl=True)}
+		\label{fig:keys2}
+	\end{figure}
+	\begin{figure}[ht]
+		\centering
+		\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis3/skl_lookuplength_box.pdf}
+		\caption{Distribution of the number of steps needed for a lookup, considering the single-lookup case run (skl=True)}
+		\label{fig:keys3}
+	\end{figure}
+	
+	Finally, it's important to check how the average quantity of keys managed by a node changes with different network sizes. \Cref{fig:keys4} shows how this value is distributed for the runs in \Cref{tab:netsize_runs}: considering that the total number of keys is balances wrt the number of nodes of the configuration, the expectation is to have similar distributions, which is actually observed in the plot. 
+	\begin{figure}[!t]
+		\centering
+		\includegraphics[width=\linewidth,clip,trim=0 0.5cm 0 0.35cm]{figures/analysis3/keyspernode.pdf}
+		\caption{Number of keys managed by a node with different network sizes.}
+		\label{fig:keys4}
+	\end{figure}	
+
+	\subsection{Plotting script usage}
+		The plots for the performed analyses has been generated with the \texttt{chord\_analyzer.py} script, which was implemented for this purpose. The arguments usage is explained in \Cref{tab:script}.
+		\begin{table}[!h]
+			\centering
+			\begin{tabular}{cl}
+				\hline
+				\textbf{Arg} & \textbf{Usage}\\
+				\hline
+				1 & Base folder where the Repast logging files are located\\
+				\hline
+				2 & Requests for the scripts, comma separated. \textit{loadnodes} and \textit{loadlookups} respectively loads the Lookup and Node datasets. \textit{all} generates all the implemented plots possible with the loaded datasets, which can also be selectively chosen with the corresponding names ("lookupduration\_time", lookupduration\_box", errors\_time", errors\_box", timeouts\_time", timeouts\_box", nodescontacted\_time", nodescontacted\_box", lookuplength\_time", lookuplength\_box", keyspernode", "nodesup\_time", failedlookups")\\
+				\hline
+				3 & Log files index (XX) to load, comma separated. Expecting Lookup\_XX and Node\_XX file as data sinks names\\
+				\hline
+				4 & \\
+				\hline
+				5 & \\
+				\hline
+				6 & \\
+				\hline
+			\end{tabular}
+		\end{table}
+
+	\clearpage
 	\printbibliography
 \end{document}
-
-
-
-
 
 
 
