@@ -158,7 +158,7 @@ else:
 		plt.gca().set_xlabel("Runs")
 
 		plt.tight_layout()
-		plt.savefig(plotdir+"/nodescontacted_length_box.pdf")
+		plt.savefig(plotdir+"/nodescontacted_box.pdf")
 		if not noshow: 
 			plt.show()
 		else: 
@@ -206,7 +206,7 @@ else:
 	if "lookupduration_box" in requests:
 		plt.boxplot([df.loc[df["complete"]==True]["duration"] for df in data_lookup.values()],showfliers=False,labels=[run_names[k.split("_")[0]][requests_titles["lookupduration_box"]] for k in data_lookup.keys()])
 
-		plt.gca().set_ylabel("Timeouts during a lookup")
+		plt.gca().set_ylabel("Duration of the lookup")
 		plt.gca().set_xlabel("Runs")
 
 		plt.tight_layout()
@@ -286,11 +286,11 @@ else:
 			df.groupby("tick")["Id"].count().plot(label=run_names[name.split("_")[0]][requests_titles["nodesup_time"]])
 
 		plt.gca().set_xlabel("Ticks")
-		plt.gca().set_ylabel("Average errors in the node data structures")
+		plt.gca().set_ylabel("Number of active nodes")
 
 		plt.tight_layout()
 		plt.legend()
-		plt.savefig(plotdir+"/errors_time.pdf")
+		plt.savefig(plotdir+"/nodesup_time.pdf")
 		if not noshow: 
 			plt.show()
 		else: 
@@ -298,7 +298,7 @@ else:
 	if "keyspernode" in requests:
 		plt.boxplot([df.groupby(["Id"],as_index=False).mean()["DataSize"] for df in data_node_up.values()],showfliers=True,labels=[run_names[k.split("_")[0]][requests_titles["keyspernode"]] for k in data_node_up.keys()])
 
-		plt.gca().set_ylabel("Errors in the node data structures")
+		plt.gca().set_ylabel("Number of keys per node")
 		plt.gca().set_xlabel("Runs")
 
 		plt.tight_layout()
